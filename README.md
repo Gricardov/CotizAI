@@ -1,109 +1,186 @@
-# CotizaiApp
+# CotizAI - Sistema de Cotización
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+## 🚀 Descripción
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+CotizAI es una aplicación fullstack desarrollada con React (frontend) y NestJS (backend) en un monorepo Nx. El sistema incluye:
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+- **Sistema de autenticación JWT** con validación de roles
+- **Dashboard con sidebar retráctil**
+- **Formulario de cotización moderno**
+- **Diseño responsive con Material-UI**
 
-## Generate a library
+## 🛠️ Tecnologías
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+### Frontend
+- React 19
+- TypeScript
+- Material-UI (MUI)
+- Vite
+- Axios
+
+### Backend
+- NestJS
+- TypeScript
+- JWT Authentication
+- Passport
+- Express
+
+### Herramientas
+- Nx Monorepo
+- ESLint
+- Prettier
+
+## 📦 Instalación
+
+1. **Clonar el repositorio:**
+```bash
+cd cotizai-app
 ```
 
-## Run tasks
-
-To build the library use:
-
-```sh
-npx nx build pkg1
+2. **Instalar dependencias:**
+```bash
+npm install
 ```
 
-To run any task with Nx use:
+## 🚀 Comandos Disponibles
 
-```sh
-npx nx <target> <project-name>
+### Ejecutar ambas aplicaciones simultáneamente:
+```bash
+npm run dev
+# o
+npm start
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Ejecutar aplicaciones por separado:
+```bash
+# Solo backend (puerto 3000)
+npm run backend
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
+# Solo frontend (puerto 4200)
+npm run frontend
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+### Construir para producción:
+```bash
+npm run build
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
-
-```sh
-npx nx sync:check
+### Ejecutar tests:
+```bash
+npm run test
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+## 🔐 Credenciales de Acceso
 
-## Set up CI!
+Para acceder al sistema, usar las siguientes credenciales:
 
-### Step 1
+- **Usuario:** `admin`
+- **Contraseña:** `12345`
+- **Área:** Seleccionar cualquiera de las 5 disponibles:
+  - Comercial
+  - Administración
+  - Marketing
+  - Ti
+  - Medios
 
-To connect to Nx Cloud, run the following command:
+## 🏗️ Estructura del Proyecto
 
-```sh
-npx nx connect
+```
+cotizai-app/
+├── backend/                 # API NestJS
+│   ├── src/
+│   │   ├── app/            # Módulo principal
+│   │   ├── auth/           # Autenticación JWT
+│   │   └── main.ts         # Punto de entrada
+├── frontend/               # Aplicación React
+│   ├── src/
+│   │   ├── app/            # Componente principal
+│   │   ├── components/     # Componentes UI
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── CotizadorForm.tsx
+│   │   └── contexts/       # Contextos React
+│   │       └── AuthContext.tsx
+└── package.json           # Scripts y dependencias
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+## 🎯 Funcionalidades
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### ✅ Sistema de Autenticación
+- Login con usuario, contraseña y área
+- Validación JWT en backend
+- Protección de rutas por rol
+- Persistencia de sesión en localStorage
 
-### Step 2
+### ✅ Dashboard
+- Sidebar retráctil con navegación
+- Información del usuario logueado
+- Opción de logout
+- Diseño responsive
 
-Use the following command to configure a CI workflow for your workspace:
+### ✅ Formulario de Cotización
+- **Datos fijos de la empresa:**
+  - Razón Social: Alavista Lab SAC
+  - RUC: 20607124711
+  - Dirección: Av. Benavides 2975, Oficina 809, Miraflores
+  - Contacto: Juan Jesús Astete Meza
+  - Teléfono: 959271576
 
-```sh
-npx nx g ci-workflow
-```
+- **Campos editables:**
+  - Fecha (selector de calendario)
+  - Nombre de empresa
+  - Proyecto (texto multilínea)
+  - Nombre del contacto
+  - Correo de contacto
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🔧 Configuración de Desarrollo
 
-## Install Nx Console
+### Puertos por defecto:
+- **Frontend:** http://localhost:4200
+- **Backend:** http://localhost:3000
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+### Variables de entorno:
+El sistema usa configuraciones por defecto, pero en producción se recomienda:
+- Cambiar la clave secreta JWT
+- Configurar variables de entorno para la base de datos
+- Establecer CORS apropiados para producción
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🎨 Diseño
 
-## Useful links
+El sistema utiliza un esquema de colores moderno:
+- **Primario:** #667eea (azul)
+- **Secundario:** #764ba2 (púrpura)
+- **Gradientes:** Linear gradients para botones y headers
+- **UI:** Material Design con componentes de MUI
 
-Learn more:
+## 📱 Responsive Design
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+La aplicación está optimizada para:
+- Desktop (1200px+)
+- Tablet (768px - 1199px)
+- Mobile (< 768px)
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 🚀 Próximos Pasos
+
+- [ ] Integración con base de datos real
+- [ ] Generación de PDFs para cotizaciones
+- [ ] Sistema de notificaciones
+- [ ] Dashboard con métricas
+- [ ] Historial de cotizaciones
+- [ ] Roles adicionales de usuario
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear una rama para la feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit los cambios (`git commit -m 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abrir un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT.
+
+---
+
+Desarrollado con ❤️ usando Nx, React y NestJS.
