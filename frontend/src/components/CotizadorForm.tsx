@@ -16,12 +16,22 @@ import {
   CardContent,
   CardActions,
   InputAdornment,
+  Dialog,
+  DialogContent,
+  CircularProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   DragIndicator as DragIcon,
   Analytics as AnalyticsIcon,
+  SmartToy as RobotIcon,
 } from '@mui/icons-material';
 import {
   DndContext,
@@ -42,10 +52,29 @@ import {
 import {
   CSS,
 } from '@dnd-kit/utilities';
+import axios from 'axios';
 
 interface Caracteristica {
   id: string;
   contenido: string;
+}
+
+interface ItemPropuesta {
+  id: string;
+  descripcion: string;
+  monto: number | string;
+  descuento: number | string;
+  subtotal: number;
+  igv: number;
+  total: number;
+}
+
+interface ServicioAdicional {
+  id: string;
+  descripcion: string;
+  monto: number | string;
+  igv: number;
+  total: number;
 }
 
 const rubros = [
@@ -72,12 +101,82 @@ const servicios = [
 
 const tipos = ['Básico', 'Complejo'];
 
+const opcionesCRM = ['Sperant', 'Evolta', 'Otros'];
+
 const caracteristicasDefault = [
   "Diseño Amigable y Atractivo: El diseño de la página web juega un papel crucial en la primera impresión que causa en los visitantes. Una página web renovada y moderna, con un diseño atractivo y amigable, captará la atención de los usuarios y los invita a explorar más a fondo.",
   "Experiencia de Usuario Mejorada: Renovar la página web para ofrecer una experiencia de usuario fluida y agradable. Con una navegación intuitiva, un diseño responsive y tiempos de carga rápidos, los usuarios podrán encontrar fácilmente la información que buscan y disfrutar de una experiencia sin contratiempos.",
   "Optimización para Motores de Búsqueda (SEO): La implementación de técnicas avanzadas de SEO en el diseño y desarrollo de la página web garantiza una mejor visibilidad en los motores de búsqueda. Esto significa que la página web estará mejor posicionada en los resultados de búsqueda, lo que aumentará su visibilidad y alcance entre los clientes potenciales.",
   "Funcionalidades Avanzadas: Al renovar la página web podremos integrar funcionalidades avanzadas que mejoran la experiencia del usuario y facilitan el proceso de búsqueda y compra de propiedades. Desde herramientas de búsqueda avanzada, e-commerce, hasta tours virtuales de los departamentos, estas funcionalidades agregan valor y diferencian a la empresa de la competencia.",
+  "Imagen Profesional y Credibilidad: Una página web renovada refleja una imagen profesional y confiable de la empresa. Con un diseño pulido y contenido de calidad, la página web inspira confianza en los visitantes y les da la seguridad de estar tratando con una empresa seria y competente.",
+  "Funcionalidades Avanzadas: Al renovar la página web podremos integrar funcionalidades avanzadas que mejoran la experiencia del usuario y facilitan el proceso de búsqueda y compra de propiedades. Desde herramientas de búsqueda avanzada, e-commerce, hasta tours virtuales de los departamentos, estas funcionalidades agregan valor y diferencian a la empresa de la competencia.",
   "Imagen Profesional y Credibilidad: Una página web renovada refleja una imagen profesional y confiable de la empresa. Con un diseño pulido y contenido de calidad, la página web inspira confianza en los visitantes y les da la seguridad de estar tratando con una empresa seria y competente."
+];
+
+const itemsPropuestaDefault: ItemPropuesta[] = [
+  {
+    id: 'item-1',
+    descripcion: 'Diseño UX/UI completo',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-2',
+    descripcion: 'Desarrollo Frontend Responsive',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-3',
+    descripcion: 'Desarrollo Backend y API',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-4',
+    descripcion: 'Integración CRM',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-5',
+    descripcion: 'Optimización SEO',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-6',
+    descripcion: 'Testing y QA',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  },
+  {
+    id: 'item-7',
+    descripcion: 'Despliegue en Producción',
+    monto: '',
+    descuento: '',
+    subtotal: 0,
+    igv: 0,
+    total: 0
+  }
 ];
 
 // Componente para tarjeta sorteable
@@ -175,6 +274,124 @@ const SortableCard: React.FC<SortableCardProps> = ({
   );
 };
 
+// Componente de robot pensando
+const RobotThinking: React.FC = () => {
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      p: 3 
+    }}>
+      <Box sx={{ 
+        position: 'relative',
+        animation: 'bounce 2s infinite',
+        '@keyframes bounce': {
+          '0%, 20%, 53%, 80%, 100%': {
+            transform: 'translate3d(0,0,0)',
+          },
+          '40%, 43%': {
+            transform: 'translate3d(0, -15px, 0)',
+          },
+          '70%': {
+            transform: 'translate3d(0, -7px, 0)',
+          },
+          '90%': {
+            transform: 'translate3d(0, -3px, 0)',
+          },
+        },
+      }}>
+        <RobotIcon sx={{ 
+          fontSize: 60, 
+          color: '#667eea',
+          filter: 'drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))',
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: -10,
+          right: -10,
+          animation: 'pulse 1.5s infinite',
+          '@keyframes pulse': {
+            '0%': {
+              transform: 'scale(1)',
+              opacity: 1,
+            },
+            '50%': {
+              transform: 'scale(1.2)',
+              opacity: 0.7,
+            },
+            '100%': {
+              transform: 'scale(1)',
+              opacity: 1,
+            },
+          },
+        }}>
+          <CircularProgress size={20} sx={{ color: '#764ba2' }} />
+        </Box>
+      </Box>
+      <Typography variant="h6" sx={{ mt: 2, color: '#667eea', fontWeight: 'bold' }}>
+        Analizando sitio web...
+      </Typography>
+      <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1 }}>
+        Nuestro AI está evaluando la estructura, diseño y optimización de la página
+      </Typography>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 1, 
+        mt: 2,
+        animation: 'dots 1.5s infinite',
+        '@keyframes dots': {
+          '0%, 20%': {
+            color: '#667eea',
+          },
+          '50%': {
+            color: '#764ba2',
+          },
+          '80%, 100%': {
+            color: '#667eea',
+          },
+        },
+      }}>
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot1 1.5s infinite',
+          '@keyframes dot1': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+        }} />
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot2 1.5s infinite',
+          '@keyframes dot2': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+          animationDelay: '0.2s',
+        }} />
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot3 1.5s infinite',
+          '@keyframes dot3': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+          animationDelay: '0.4s',
+        }} />
+      </Box>
+    </Box>
+  );
+};
+
 export const CotizadorForm: React.FC = () => {
   const [formData, setFormData] = useState({
     fecha: '',
@@ -190,6 +407,8 @@ export const CotizadorForm: React.FC = () => {
     urlAnalisis: '',
     detallePagina: '',
     tiempoDesarrollo: 'El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario.',
+    crmSeleccionado: '',
+    crmOtro: '',
   });
 
   const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>(
@@ -198,6 +417,9 @@ export const CotizadorForm: React.FC = () => {
       contenido: texto
     }))
   );
+
+  const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>(itemsPropuestaDefault);
+  const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>([]);
 
   const [success, setSuccess] = useState(false);
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
@@ -208,6 +430,114 @@ export const CotizadorForm: React.FC = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Función para calcular valores de items de propuesta
+  const calcularItemPropuesta = (monto: number | string, descuento: number | string): Partial<ItemPropuesta> => {
+    const montoValue = typeof monto === 'string' ? (monto === '' ? 0 : Number(monto)) : monto;
+    const descuentoValue = typeof descuento === 'string' ? (descuento === '' ? 0 : Number(descuento)) : descuento;
+    const montoNum = isNaN(montoValue) ? 0 : montoValue;
+    const descuentoNum = isNaN(descuentoValue) ? 0 : descuentoValue;
+    const subtotal = montoNum - descuentoNum;
+    const igv = subtotal * 0.18;
+    const total = subtotal + igv;
+    return { subtotal, igv, total };
+  };
+
+  // Función para calcular valores de servicios adicionales
+  const calcularServicioAdicional = (monto: number | string): Partial<ServicioAdicional> => {
+    const montoValue = typeof monto === 'string' ? (monto === '' ? 0 : Number(monto)) : monto;
+    const montoNum = isNaN(montoValue) ? 0 : montoValue;
+    const igv = montoNum * 0.18;
+    const total = montoNum + igv;
+    return { igv, total };
+  };
+
+  // Manejar cambios en items de propuesta
+  const handleItemPropuestaChange = (id: string, field: keyof ItemPropuesta, value: string | number) => {
+    setItemsPropuesta(prev => prev.map(item => {
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        
+        // Recalcular cuando cambien monto o descuento
+        if (field === 'monto' || field === 'descuento') {
+          const montoValue = field === 'monto' ? value : updatedItem.monto;
+          const descuentoValue = field === 'descuento' ? value : updatedItem.descuento;
+          const calculatedValues = calcularItemPropuesta(montoValue, descuentoValue);
+          return { ...updatedItem, ...calculatedValues };
+        }
+        
+        return updatedItem;
+      }
+      return item;
+    }));
+  };
+
+  // Manejar cambios en servicios adicionales
+  const handleServicioAdicionalChange = (id: string, field: keyof ServicioAdicional, value: string | number) => {
+    setServiciosAdicionales(prev => prev.map(servicio => {
+      if (servicio.id === id) {
+        const updatedServicio = { ...servicio, [field]: value };
+        
+        // Recalcular cuando cambie el monto
+        if (field === 'monto') {
+          const calculatedValues = calcularServicioAdicional(value);
+          return { ...updatedServicio, ...calculatedValues };
+        }
+        
+        return updatedServicio;
+      }
+      return servicio;
+    }));
+  };
+
+  // Agregar nuevo item de propuesta
+  const agregarItemPropuesta = () => {
+    const nuevoItem: ItemPropuesta = {
+      id: `item-${Date.now()}`,
+      descripcion: '',
+      monto: '',
+      descuento: '',
+      subtotal: 0,
+      igv: 0,
+      total: 0
+    };
+    setItemsPropuesta(prev => [...prev, nuevoItem]);
+  };
+
+  // Eliminar item de propuesta
+  const eliminarItemPropuesta = (id: string) => {
+    setItemsPropuesta(prev => prev.filter(item => item.id !== id));
+  };
+
+  // Agregar nuevo servicio adicional
+  const agregarServicioAdicional = () => {
+    const nuevoServicio: ServicioAdicional = {
+      id: `servicio-${Date.now()}`,
+      descripcion: '',
+      monto: '',
+      igv: 0,
+      total: 0
+    };
+    setServiciosAdicionales(prev => [...prev, nuevoServicio]);
+  };
+
+  // Eliminar servicio adicional
+  const eliminarServicioAdicional = (id: string) => {
+    setServiciosAdicionales(prev => prev.filter(servicio => servicio.id !== id));
+  };
+
+  // Calcular totales generales
+  const calcularTotales = () => {
+    const totalPropuesta = itemsPropuesta.reduce((sum, item) => sum + item.total, 0);
+    const totalServicios = serviciosAdicionales.reduce((sum, servicio) => sum + servicio.total, 0);
+    const granTotal = totalPropuesta + totalServicios;
+    
+    return {
+      totalPropuesta: totalPropuesta.toFixed(2),
+      totalServicios: totalServicios.toFixed(2),
+      granTotal: granTotal.toFixed(2)
+    };
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -239,6 +569,15 @@ export const CotizadorForm: React.FC = () => {
         }));
       }
     }
+
+    // Limpiar campo "Otros" cuando se cambia la selección de CRM
+    if (field === 'crmSeleccionado' && value !== 'Otros') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        crmOtro: ''
+      }));
+    }
   };
 
   const handleAnalizarWeb = async () => {
@@ -249,24 +588,24 @@ export const CotizadorForm: React.FC = () => {
 
     setAnalizandoWeb(true);
     
-    // Simulación de análisis web (aquí puedes integrar una API real)
-    setTimeout(() => {
-      const analisisTexto = `Análisis de la página web: ${formData.urlAnalisis}
-
-La estructura actual presenta oportunidades de mejora en términos de navegación, diseño visual y experiencia de usuario. Se recomienda una renovación completa que incluya:
-
-- Reorganización de la navegación principal
-- Mejora en la presentación visual de productos/servicios
-- Optimización para dispositivos móviles
-- Implementación de mejores prácticas de SEO
-- Integración de elementos interactivos modernos`;
+    try {
+      const response = await axios.post('http://localhost:3000/api/analizar-web', {
+        url: formData.urlAnalisis
+      });
 
       setFormData(prev => ({
         ...prev,
-        detallePagina: analisisTexto
+        detallePagina: response.data.analisis
       }));
+    } catch (error) {
+      console.error('Error al analizar web:', error);
+      setFormData(prev => ({
+        ...prev,
+        detallePagina: 'Error al analizar la página web. Por favor, intenta nuevamente.'
+      }));
+    } finally {
       setAnalizandoWeb(false);
-    }, 2000);
+    }
   };
 
   const generarTextoServicio = (rubro: string, servicio: string): string => {
@@ -315,11 +654,15 @@ La estructura actual presenta oportunidades de mejora en términos de navegació
     e.preventDefault();
     console.log('Datos del formulario:', {
       ...formData,
-      caracteristicas: caracteristicas
+      caracteristicas: caracteristicas,
+      itemsPropuesta: itemsPropuesta,
+      serviciosAdicionales: serviciosAdicionales
     });
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
   };
+
+  const totales = calcularTotales();
 
   return (
     <Box sx={{ maxWidth: '1000px', mx: 'auto' }}>
@@ -364,7 +707,7 @@ La estructura actual presenta oportunidades de mejora en términos de navegació
               fontWeight: 'bold'
             }}
           >
-            Datos de la empresa: FIJO
+            Datos de la empresa:
           </Typography>
           
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
@@ -677,133 +1020,6 @@ La estructura actual presenta oportunidades de mejora en términos de navegació
               </Box>
             </Box>
 
-            {/* Nueva sección: Estructura propuesta del sitio web */}
-            <Divider sx={{ my: 3 }} />
-            
-            <Box>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  color: '#333',
-                  fontWeight: 'bold',
-                  mb: 3,
-                }}
-              >
-                Estructura propuesta del sitio web
-              </Typography>
-
-              {/* Input URL con botón Analizar */}
-              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 3 }}>
-                <TextField
-                  label="URL del sitio web (opcional)"
-                  variant="outlined"
-                  placeholder="https://ejemplo.com"
-                  value={formData.urlAnalisis}
-                  onChange={handleChange('urlAnalisis')}
-                  sx={{
-                    flex: 1,
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': {
-                        borderColor: '#667eea',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
-                      },
-                    },
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        🌐
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleAnalizarWeb}
-                  disabled={analizandoWeb || !formData.urlAnalisis}
-                  startIcon={analizandoWeb ? null : <AnalyticsIcon />}
-                  sx={{
-                    py: 1.8,
-                    px: 3,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    },
-                    borderRadius: 1,
-                    textTransform: 'none',
-                    fontWeight: 'bold',
-                    minWidth: '140px',
-                  }}
-                >
-                  {analizandoWeb ? 'Analizando...' : 'Analizar web'}
-                </Button>
-              </Box>
-
-              {/* Textarea para detalle de la página */}
-              <TextField
-                label="Detalle de la página (opcional)"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={6}
-                value={formData.detallePagina}
-                onChange={handleChange('detallePagina')}
-                placeholder="Descripción del análisis de la estructura actual del sitio web..."
-                sx={{
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-
-              {/* Campos fijos de integración */}
-              <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2, mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
-                  INTEGRACIÓN:
-                </Typography>
-                <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Integración de leads e inventario de unidades por proyecto.
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Pruebas de integración con proveedor.
-                  </Typography>
-                  <Typography variant="body1">
-                    Integración: Mediante API a CRM
-                  </Typography>
-                </Box>
-              </Paper>
-
-              {/* Tiempo de desarrollo editable */}
-              <TextField
-                label="Tiempo de desarrollo:"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={2}
-                value={formData.tiempoDesarrollo}
-                onChange={handleChange('tiempoDesarrollo')}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-            </Box>
-
             {/* Contenido fijo adicional */}
             <Divider sx={{ my: 3 }} />
             
@@ -981,6 +1197,520 @@ La estructura actual presenta oportunidades de mejora en términos de navegació
               </Box>
             </Paper>
 
+            {/* Nueva sección: Estructura propuesta del sitio web */}
+            <Divider sx={{ my: 3 }} />
+            
+            <Box>
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  color: '#333',
+                  fontWeight: 'bold',
+                  mb: 3,
+                }}
+              >
+                Estructura propuesta del sitio web
+              </Typography>
+
+              {/* Input URL con botón Analizar */}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 3 }}>
+                <TextField
+                  label="URL del sitio web (opcional)"
+                  variant="outlined"
+                  placeholder="https://ejemplo.com"
+                  value={formData.urlAnalisis}
+                  onChange={handleChange('urlAnalisis')}
+                  sx={{
+                    flex: 1,
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        🌐
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleAnalizarWeb}
+                  disabled={analizandoWeb || !formData.urlAnalisis}
+                  startIcon={analizandoWeb ? null : <AnalyticsIcon />}
+                  sx={{
+                    py: 1.8,
+                    px: 3,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    },
+                    borderRadius: 1,
+                    textTransform: 'none',
+                    fontWeight: 'bold',
+                    minWidth: '140px',
+                  }}
+                >
+                  {analizandoWeb ? 'Analizando...' : 'Analizar web'}
+                </Button>
+              </Box>
+
+              {/* Textarea para detalle de la página */}
+              <TextField
+                label="Detalle de la página (opcional)"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={6}
+                value={formData.detallePagina}
+                onChange={handleChange('detallePagina')}
+                placeholder="Descripción del análisis de la estructura actual del sitio web..."
+                sx={{
+                  mb: 3,
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+
+              {/* Campos fijos de integración con combobox CRM */}
+              <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2, mb: 3 }}>
+                <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
+                  INTEGRACIÓN:
+                </Typography>
+                <Box sx={{ color: '#6c757d', lineHeight: 1.8, mb: 3 }}>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    Integración de leads e inventario de unidades por proyecto.
+                  </Typography>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    Pruebas de integración con proveedor.
+                  </Typography>
+                </Box>
+                
+                {/* Combo CRM */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Integración: Mediante API a CRM</InputLabel>
+                    <Select
+                      value={formData.crmSeleccionado}
+                      label="Integración: Mediante API a CRM"
+                      onChange={handleChange('crmSeleccionado')}
+                      sx={{
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#667eea',
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: '#667eea',
+                        },
+                      }}
+                    >
+                      {opcionesCRM.map((crm) => (
+                        <MenuItem key={crm} value={crm}>
+                          {crm}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  {/* Input para "Otros" */}
+                  {formData.crmSeleccionado === 'Otros' && (
+                    <TextField
+                      label="Especificar CRM"
+                      variant="outlined"
+                      fullWidth
+                      value={formData.crmOtro}
+                      onChange={handleChange('crmOtro')}
+                      placeholder="Ingrese el nombre del CRM..."
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                </Box>
+              </Paper>
+
+              {/* Tiempo de desarrollo editable */}
+              <TextField
+                label="Tiempo de desarrollo:"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={2}
+                value={formData.tiempoDesarrollo}
+                onChange={handleChange('tiempoDesarrollo')}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+            </Box>
+
+            {/* NUEVA SECCIÓN: PROPUESTA ECONÓMICA */}
+            <Divider sx={{ my: 3 }} />
+            
+            <Box>
+              <Typography 
+                variant="h5" 
+                sx={{ 
+                  color: '#333',
+                  fontWeight: 'bold',
+                  mb: 3,
+                }}
+              >
+                Propuesta Económica
+              </Typography>
+
+              {/* Tabla principal: Diseño y desarrollo de página web */}
+              <Paper sx={{ mb: 3 }}>
+                <Box sx={{ p: 3, backgroundColor: '#667eea', color: 'white' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    Diseño y desarrollo de página web Inmobiliaria
+                  </Typography>
+                </Box>
+                
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '250px' }}>Descripción</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto (S/.)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Descuento</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Subtotal</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>IGV (18%)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Total</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', width: '60px' }}>Acción</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {itemsPropuesta.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              size="small"
+                              value={item.descripcion}
+                              onChange={(e) => handleItemPropuestaChange(item.id, 'descripcion', e.target.value)}
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  '&:hover fieldset': { borderColor: '#667eea' },
+                                  '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                },
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              size="small"
+                              type="number"
+                              value={item.monto === '' ? '' : item.monto}
+                              onChange={(e) => handleItemPropuestaChange(item.id, 'monto', e.target.value)}
+                              placeholder="0.00"
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  '&:hover fieldset': { borderColor: '#667eea' },
+                                  '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                },
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <TextField
+                              fullWidth
+                              variant="outlined"
+                              size="small"
+                              type="number"
+                              value={item.descuento === '' ? '' : item.descuento}
+                              onChange={(e) => handleItemPropuestaChange(item.id, 'descuento', e.target.value)}
+                              placeholder="0.00"
+                              sx={{
+                                '& .MuiOutlinedInput-root': {
+                                  '&:hover fieldset': { borderColor: '#667eea' },
+                                  '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                },
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
+                              S/. {item.subtotal.toFixed(2)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
+                              S/. {item.igv.toFixed(2)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography variant="body2" sx={{ color: '#28a745', fontWeight: 'bold' }}>
+                              S/. {item.total.toFixed(2)}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => eliminarItemPropuesta(item.id)}
+                              disabled={itemsPropuesta.length <= 1}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={agregarItemPropuesta}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderColor: '#667eea',
+                      color: '#667eea',
+                      '&:hover': { borderColor: '#5a6fd8', backgroundColor: 'rgba(102, 126, 234, 0.05)' },
+                    }}
+                  >
+                    Agregar Item
+                  </Button>
+                  <Typography variant="h6" sx={{ color: '#495057', fontWeight: 'bold' }}>
+                    Total: S/. {totales.totalPropuesta}
+                  </Typography>
+                </Box>
+              </Paper>
+
+              {/* Tabla de servicios adicionales */}
+              <Paper sx={{ mb: 3 }}>
+                <Box sx={{ p: 3, backgroundColor: '#764ba2', color: 'white' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    Servicios adicionales
+                  </Typography>
+                </Box>
+                
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '250px' }}>Descripción</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto (S/.)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>IGV (18%)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Total</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', width: '60px' }}>Acción</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {serviciosAdicionales.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} sx={{ textAlign: 'center', py: 3, color: '#6c757d' }}>
+                            No hay servicios adicionales agregados
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        serviciosAdicionales.map((servicio) => (
+                          <TableRow key={servicio.id}>
+                            <TableCell>
+                              <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                value={servicio.descripcion}
+                                onChange={(e) => handleServicioAdicionalChange(servicio.id, 'descripcion', e.target.value)}
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    '&:hover fieldset': { borderColor: '#667eea' },
+                                    '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                  },
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                value={servicio.monto === '' ? '' : servicio.monto}
+                                onChange={(e) => handleServicioAdicionalChange(servicio.id, 'monto', e.target.value)}
+                                placeholder="0.00"
+                                sx={{
+                                  '& .MuiOutlinedInput-root': {
+                                    '&:hover fieldset': { borderColor: '#667eea' },
+                                    '&.Mui-focused fieldset': { borderColor: '#667eea' },
+                                  },
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
+                                S/. {servicio.igv.toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ color: '#28a745', fontWeight: 'bold' }}>
+                                S/. {servicio.total.toFixed(2)}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => eliminarServicioAdicional(servicio.id)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                
+                <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
+                  <Button
+                    startIcon={<AddIcon />}
+                    onClick={agregarServicioAdicional}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderColor: '#764ba2',
+                      color: '#764ba2',
+                      '&:hover': { borderColor: '#6a4190', backgroundColor: 'rgba(118, 75, 162, 0.05)' },
+                    }}
+                  >
+                    Agregar Servicio
+                  </Button>
+                  <Typography variant="h6" sx={{ color: '#495057', fontWeight: 'bold' }}>
+                    Total: S/. {totales.totalServicios}
+                  </Typography>
+                </Box>
+              </Paper>
+
+              {/* Total general */}
+              <Paper sx={{ p: 3, backgroundColor: '#28a745', color: 'white', mb: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                    TOTAL GENERAL
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    S/. {totales.granTotal}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Box>
+
+            {/* Condiciones */}
+            <Paper sx={{ p: 4, backgroundColor: '#f8f9fa', borderRadius: 2, border: '2px solid #dee2e6' }}>
+              <Typography variant="h6" sx={{ mb: 3, color: '#495057', fontWeight: 'bold' }}>
+                Condiciones:
+              </Typography>
+              <Box sx={{ color: '#495057', lineHeight: 1.8 }}>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Validez de la Cotización:</strong> 30 días.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Forma de pago:</strong> {formData.servicio === 'Mejora (solo mostrar el tipo básico)' ? '100% al aceptar la propuesta.' : '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.'}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Moneda:</strong> Dólares Americanos.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Duración del Proyecto:</strong> El proyecto tiene una duración estimada de 90 días calendario, divididas en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Variaciones en el Tiempo de Entrega:</strong>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1, ml: 2 }}>
+                  • <strong>Factores Externos:</strong> El tiempo estimado para la finalización de cada fase puede variar debido a factores externos fuera de nuestro control, como interrupciones en el servicio de las plataformas, cambios en las regulaciones legales, o eventos de fuerza mayor.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1, ml: 2 }}>
+                  • <strong>Factores Propios del Cliente:</strong> Cualquier retraso en el feedback, la aceptación de entregables o cambios en los requisitos por parte del cliente puede afectar el cronograma establecido. Es esencial que el cliente proporcione respuestas y aprobaciones de manera oportuna para mantener el cronograma previsto.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2, ml: 2 }}>
+                  • <strong>Revisión y Ajustes:</strong> Al finalizar cada sprint, se realizarán revisiones y ajustes necesarios en función del feedback recibido del cliente. Cualquier cambio significativo que requiera un esfuerzo adicional será discutido y presupuestado por separado.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Propiedad Intelectual:</strong> Todos los derechos de propiedad intelectual desarrollados durante este proyecto serán transferidos al cliente una vez se hayan realizado todos los pagos acordados.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  <strong>Confidencialidad:</strong> Ambas partes acuerdan mantener la confidencialidad de toda la información compartida durante el proyecto.
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Garantía:</strong> Se garantiza soporte y mantenimiento por un período de 6 meses después del despliegue final.
+                </Typography>
+              </Box>
+            </Paper>
+
+            {/* Firma */}
+            <Box sx={{ mt: 4, textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ mb: 3, color: '#495057', fontWeight: 'bold' }}>
+                FIRMA:
+              </Typography>
+              
+              {/* Imagen dummy de firma */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                mb: 3,
+                p: 2,
+                border: '2px dashed #dee2e6',
+                borderRadius: 2,
+                backgroundColor: '#f8f9fa'
+              }}>
+                <Box sx={{
+                  width: 200,
+                  height: 80,
+                  backgroundColor: 'white',
+                  border: '1px solid #dee2e6',
+                  borderRadius: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px',
+                  color: '#6c757d',
+                  fontStyle: 'italic'
+                }}>
+                  [Firma]
+                </Box>
+              </Box>
+              
+              <Typography variant="body1" sx={{ color: '#495057', fontWeight: 'bold', mb: 1 }}>
+                Juan Jesús Astete Meza
+              </Typography>
+              <Typography variant="body1" sx={{ color: '#6c757d' }}>
+                Cargo: CTO
+              </Typography>
+            </Box>
+
             {success && (
               <Alert severity="success" sx={{ mb: 2 }}>
                 ¡Cotización guardada exitosamente!
@@ -1011,6 +1741,21 @@ La estructura actual presenta oportunidades de mejora en términos de navegació
           </Box>
         </form>
       </Paper>
+
+      {/* Dialog para mostrar animación del robot */}
+      <Dialog
+        open={analizandoWeb}
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: 3,
+            minWidth: '400px',
+          },
+        }}
+      >
+        <DialogContent>
+          <RobotThinking />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }; 
