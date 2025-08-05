@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -32,6 +32,7 @@ import {
   DragIndicator as DragIcon,
   Analytics as AnalyticsIcon,
   SmartToy as RobotIcon,
+  PictureAsPdf as PdfIcon,
 } from '@mui/icons-material';
 import {
   DndContext,
@@ -53,6 +54,7 @@ import {
   CSS,
 } from '@dnd-kit/utilities';
 import axios from 'axios';
+import { PDFGeneratorService, CotizacionData } from '../services/pdf-generator.service';
 
 interface Caracteristica {
   id: string;
@@ -281,7 +283,7 @@ const RobotThinking: React.FC = () => {
       display: 'flex', 
       flexDirection: 'column', 
       alignItems: 'center', 
-      p: 3 
+      p: 4 
     }}>
       <Box sx={{ 
         position: 'relative',
@@ -330,15 +332,18 @@ const RobotThinking: React.FC = () => {
         </Box>
       </Box>
       <Typography variant="h6" sx={{ mt: 2, color: '#667eea', fontWeight: 'bold' }}>
-        Analizando sitio web...
+        Analizando estructura web...
       </Typography>
-      <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1 }}>
-        Nuestro AI está evaluando la estructura, diseño y optimización de la página
+      <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1, maxWidth: 300 }}>
+        🔍 Detectando secciones existentes<br/>
+        📋 Identificando contenido faltante<br/>
+        🎯 Evaluando estructura por sector<br/>
+        💡 Generando recomendaciones IA
       </Typography>
       <Box sx={{ 
         display: 'flex', 
         gap: 1, 
-        mt: 2,
+        mt: 3,
         animation: 'dots 1.5s infinite',
         '@keyframes dots': {
           '0%, 20%': {
@@ -396,7 +401,7 @@ export const CotizadorForm: React.FC = () => {
   const [formData, setFormData] = useState({
     fecha: '',
     nombreEmpresa: '',
-    proyecto: '',
+    nombreProyecto: '',
     nombreContacto: '',
     correoContacto: '',
     rubro: '',
@@ -404,6 +409,7 @@ export const CotizadorForm: React.FC = () => {
     tipo: '',
     promptsRequerimientos: '',
     servicioNecesidad: '',
+    descripcionProyecto: '',
     urlAnalisis: '',
     detallePagina: '',
     tiempoDesarrollo: 'El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario.',
@@ -423,6 +429,7 @@ export const CotizadorForm: React.FC = () => {
 
   const [success, setSuccess] = useState(false);
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
+  const [tiempoAnalizado, setTiempoAnalizado] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -551,7 +558,7 @@ export const CotizadorForm: React.FC = () => {
     }
   };
 
-  const handleChange = (field: string) => (event: any) => {
+  const handleChange = (field: string) => async (event: any) => {
     const value = event.target.value;
     setFormData(prev => ({
       ...prev,
@@ -567,6 +574,9 @@ export const CotizadorForm: React.FC = () => {
           [field]: value,
           servicioNecesidad: generarTextoServicio(newFormData.rubro, newFormData.servicio)
         }));
+        
+        // Generar descripción del proyecto automáticamente
+        generarDescripcionProyecto(newFormData.rubro, newFormData.servicio);
       }
     }
 
@@ -578,7 +588,37 @@ export const CotizadorForm: React.FC = () => {
         crmOtro: ''
       }));
     }
+
+    // Analizar tiempo de desarrollo cuando cambie
+    if (field === 'tiempoDesarrollo') {
+      analizarTiempoDesarrollo(value);
+    }
   };
+
+  const analizarTiempoDesarrollo = async (tiempo: string) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/analizar-tiempo-desarrollo', {
+        tiempoDesarrollo: tiempo
+      });
+
+      if (response.data.success) {
+        setTiempoAnalizado(response.data.tiempoAnalizado);
+      } else {
+        // Fallback si falla el análisis
+        setTiempoAnalizado('El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario, divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.');
+      }
+    } catch (error) {
+      console.error('Error analizando tiempo de desarrollo:', error);
+      setTiempoAnalizado('El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario, divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.');
+    }
+  };
+
+  // Analizar tiempo de desarrollo al cargar el componente
+  useEffect(() => {
+    if (formData.tiempoDesarrollo) {
+      analizarTiempoDesarrollo(formData.tiempoDesarrollo);
+    }
+  }, []);
 
   const handleAnalizarWeb = async () => {
     if (!formData.urlAnalisis) {
@@ -586,22 +626,68 @@ export const CotizadorForm: React.FC = () => {
       return;
     }
 
+    if (!formData.rubro || !formData.servicio || !formData.tipo) {
+      alert('Por favor selecciona el rubro, servicio y tipo antes de analizar la web');
+      return;
+    }
+
     setAnalizandoWeb(true);
     
     try {
-      const response = await axios.post('http://localhost:3000/api/analizar-web', {
-        url: formData.urlAnalisis
+      const response = await axios.post('http://localhost:3000/api/analizar-estructura-web', {
+        url: formData.urlAnalisis,
+        rubro: formData.rubro,
+        servicio: formData.servicio,
+        tipo: formData.tipo
       });
 
-      setFormData(prev => ({
-        ...prev,
-        detallePagina: response.data.analisis
-      }));
+      if (response.data.success) {
+        const structureData = response.data.data;
+        
+        // Mostrar solo el análisis en el formato específico solicitado
+        setFormData(prev => ({
+          ...prev,
+          detallePagina: structureData.overall_analysis
+        }));
+      } else {
+        // En caso de error, usar los datos del fallback
+        setFormData(prev => ({
+          ...prev,
+          detallePagina: response.data.data.overall_analysis
+        }));
+      }
     } catch (error) {
       console.error('Error al analizar web:', error);
       setFormData(prev => ({
         ...prev,
-        detallePagina: 'Error al analizar la página web. Por favor, intenta nuevamente.'
+        detallePagina: `Error al analizar la estructura de la página web: ${formData.urlAnalisis}
+
+No fue posible conectar con el sitio web especificado. Esto puede deberse a:
+• El sitio web no está disponible o accesible públicamente
+• Problemas de conectividad temporal
+• Restricciones de acceso del servidor
+• URL incorrecta o incompleta
+
+RECOMENDACIONES GENERALES PARA ${formData.rubro.toUpperCase()} - ${formData.servicio.toUpperCase()}:
+
+Para maximizar el potencial de su sitio web en el sector ${formData.rubro.toLowerCase()}, considere implementar las siguientes secciones:
+
+📋 SECCIONES ESENCIALES:
+• Inicio (Home) con navegación clara y formulario de contacto
+• Sección de proyectos o productos con galería
+• Página de contacto con información completa
+• Sección "Nosotros" con historia y valores de la empresa
+
+🔧 FUNCIONALIDADES ESPECÍFICAS DEL SECTOR:
+${formData.rubro === 'Inmobiliario' ? 
+  '• Galería de propiedades con filtros avanzados\n• Calculadora de préstamos\n• Sistema de reservas online\n• Tours virtuales' :
+  formData.rubro === 'Retail' ? 
+  '• Catálogo de productos con carrito de compras\n• Sistema de pagos online\n• Reviews y ratings\n• Programa de lealtad' :
+  '• Calculadoras financieras\n• Simuladores de crédito\n• Dashboard personalizado\n• Sistema de seguridad 2FA'}
+
+Una estructura web optimizada mejorará significativamente la experiencia del usuario y la conversión de visitantes en clientes potenciales.
+
+Por favor, verifique la URL e intente nuevamente.`
       }));
     } finally {
       setAnalizandoWeb(false);
@@ -630,6 +716,53 @@ export const CotizadorForm: React.FC = () => {
     return textos[rubro]?.[servicio] || `En el sector ${rubro.toLowerCase()}, la implementación de ${servicio.toLowerCase()} representa una oportunidad estratégica para mejorar la presencia digital y optimizar la experiencia del cliente, adaptándose a las demandas actuales del mercado.`;
   };
 
+  const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/generar-descripcion-proyecto', {
+        rubro: rubro,
+        servicio: servicio
+      });
+
+      if (response.data.success) {
+        setFormData(prev => ({
+          ...prev,
+          descripcionProyecto: response.data.descripcion
+        }));
+      } else {
+        // Fallback con descripción local si el endpoint falla
+        const descripciones: { [key: string]: { [key: string]: string } } = {
+          'Inmobiliario': {
+            'Landing': 'Este proyecto consiste en la creación de una página web de landing page para una empresa inmobiliaria. El objetivo principal es captar la atención de los visitantes y proporcionar una experiencia de usuario fluida y profesional.',
+            'E-Commerce': 'La plataforma de comercio electrónico permitirá a los clientes explorar, comparar y adquirir propiedades de manera eficiente. Incluye un sistema de búsqueda avanzado, filtros de precios, tours virtuales y un carrito de compras interactivo.',
+            'Aplicación': 'Una aplicación móvil especializada para el sector inmobiliario, permitirá a los usuarios acceder a la información de propiedades, visualizar tours virtuales, y mantenerse informados sobre las últimas ofertas y noticias del mercado.'
+          },
+          'Retail': {
+            'E-Commerce': 'Este proyecto de comercio electrónico para retail implica la creación de una plataforma moderna y atractiva para un negocio de venta minorista. Incluye un catálogo de productos, sistema de pagos seguro, y una experiencia de usuario intuitiva para los clientes.',
+            'Landing': 'Una página web de landing page para retail, diseñada para captar la atención de los visitantes y convertirlos en compradores potenciales. Incluye un diseño atractivo, información sobre productos, y un formulario de contacto efectivo.',
+            'Aplicación': 'Una aplicación móvil para retail, que permitirá a los clientes acceder al catálogo de productos, realizar compras, recibir notificaciones de ofertas y mantenerse actualizados sobre el inventario.'
+          },
+          'Financiero': {
+            'Landing': 'Este proyecto de página web de landing page para el sector financiero, tiene como objetivo transmitir la confianza y seguridad de la institución. Incluye información sobre servicios, historial, y un diseño profesional que refleje la credibilidad del negocio.',
+            'Aplicación': 'Una aplicación financiera segura, que permitirá a los usuarios gestionar sus finanzas, realizar transacciones, y acceder a servicios bancarios de manera conveniente. Incluye un diseño intuitivo y una experiencia de usuario fluida.',
+            'Web Multiproyecto': 'Un ecosistema web completo para servicios financieros, que integra múltiples productos y servicios bajo una marca cohesiva. Incluye un sistema de gestión de contenido, integración con API de terceros, y un diseño moderno.'
+          }
+        };
+
+        setFormData(prev => ({
+          ...prev,
+          descripcionProyecto: descripciones[rubro]?.[servicio] || `Este proyecto de ${servicio.toLowerCase()} para el sector ${rubro.toLowerCase()} consiste en la creación de una plataforma digital que cumpla con los requisitos de funcionalidad, diseño y optimización para SEO.`
+        }));
+      }
+    } catch (error) {
+      console.error('Error generando descripción del proyecto:', error);
+      // Fallback con descripción básica
+      setFormData(prev => ({
+        ...prev,
+        descripcionProyecto: `Este proyecto de ${servicio.toLowerCase()} para el sector ${rubro.toLowerCase()} consiste en la creación de una plataforma digital moderna y funcional.`
+      }));
+    }
+  };
+
   const handleCaracteristicaChange = (id: string, valor: string) => {
     setCaracteristicas(prev => 
       prev.map(item => 
@@ -650,16 +783,44 @@ export const CotizadorForm: React.FC = () => {
     setCaracteristicas(prev => prev.filter(item => item.id !== id));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Datos del formulario:', {
-      ...formData,
-      caracteristicas: caracteristicas,
-      itemsPropuesta: itemsPropuesta,
-      serviciosAdicionales: serviciosAdicionales
-    });
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 3000);
+    
+    try {
+      // Preparar datos para el PDF
+      const cotizacionData: CotizacionData = {
+        fecha: formData.fecha,
+        nombreEmpresa: formData.nombreEmpresa,
+        nombreProyecto: formData.nombreProyecto,
+        nombreContacto: formData.nombreContacto,
+        correoContacto: formData.correoContacto,
+        rubro: formData.rubro,
+        servicio: formData.servicio,
+        tipo: formData.tipo,
+        promptsRequerimientos: formData.promptsRequerimientos,
+        servicioNecesidad: formData.servicioNecesidad,
+        descripcionProyecto: formData.descripcionProyecto,
+        urlAnalisis: formData.urlAnalisis,
+        detallePagina: formData.detallePagina,
+        tiempoDesarrollo: formData.tiempoDesarrollo,
+        crmSeleccionado: formData.crmSeleccionado,
+        crmOtro: formData.crmOtro,
+        caracteristicas: caracteristicas,
+        itemsPropuesta: itemsPropuesta,
+        serviciosAdicionales: serviciosAdicionales,
+        tiempoAnalizado: tiempoAnalizado
+      };
+
+      // Generar PDF
+      await PDFGeneratorService.generateCotizacionPDF(cotizacionData);
+      
+      console.log('Datos del formulario:', cotizacionData);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      alert('Error al generar el PDF. Por favor, intente nuevamente.');
+    }
   };
 
   const totales = calcularTotales();
@@ -748,7 +909,7 @@ export const CotizadorForm: React.FC = () => {
                   shrink: true,
                 }}
                 sx={{
-                  flex: '1 1 250px',
+                  flex: '1 1 200px',
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
                       borderColor: '#667eea',
@@ -766,47 +927,7 @@ export const CotizadorForm: React.FC = () => {
                 value={formData.nombreEmpresa}
                 onChange={handleChange('nombreEmpresa')}
                 sx={{
-                  flex: '1 1 250px',
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-            </Box>
-
-            <TextField
-              label="Proyecto"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={3}
-              value={formData.proyecto}
-              onChange={handleChange('proyecto')}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#667eea',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
-                  },
-                },
-              }}
-            />
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Nombre del contacto"
-                variant="outlined"
-                value={formData.nombreContacto}
-                onChange={handleChange('nombreContacto')}
-                sx={{
-                  flex: '1 1 250px',
+                  flex: '1 1 200px',
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
                       borderColor: '#667eea',
@@ -819,13 +940,12 @@ export const CotizadorForm: React.FC = () => {
               />
 
               <TextField
-                label="Correo de contacto"
+                label="Nombre del proyecto"
                 variant="outlined"
-                type="email"
-                value={formData.correoContacto}
-                onChange={handleChange('correoContacto')}
+                value={formData.nombreProyecto}
+                onChange={handleChange('nombreProyecto')}
                 sx={{
-                  flex: '1 1 250px',
+                  flex: '1 1 200px',
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
                       borderColor: '#667eea',
@@ -838,16 +958,7 @@ export const CotizadorForm: React.FC = () => {
               />
             </Box>
 
-            {/* Texto fijo */}
-            <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
-              <Typography variant="body1" sx={{ color: '#495057', lineHeight: 1.6 }}>
-                Señores "<strong>{formData.nombreEmpresa || '[NOMBRE DE LA EMPRESA]'}</strong>"<br />
-                De nuestra especial consideración:<br /><br />
-                Luego de extenderle un cordial saludo por medio de la presente, tenemos el agrado de hacerles llegar nuestra propuesta para atender su requerimiento.
-              </Typography>
-            </Paper>
-
-            {/* Combos */}
+            {/* Combos reorganizados */}
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <FormControl sx={{ flex: '1 1 200px' }}>
                 <InputLabel>Rubro</InputLabel>
@@ -919,6 +1030,97 @@ export const CotizadorForm: React.FC = () => {
               </FormControl>
             </Box>
 
+            {/* Servicio (Necesidad) */}
+            <TextField
+              label="SERVICIO (NECESIDAD)"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={6}
+              value={formData.servicioNecesidad}
+              onChange={handleChange('servicioNecesidad')}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#667eea',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+              }}
+            />
+
+            {/* Descripción del proyecto */}
+            <TextField
+              label="Descripción del proyecto"
+              variant="outlined"
+              fullWidth
+              multiline
+              rows={4}
+              value={formData.descripcionProyecto}
+              onChange={handleChange('descripcionProyecto')}
+              placeholder="Descripción detallada del proyecto..."
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#667eea',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#667eea',
+                  },
+                },
+              }}
+            />
+
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField
+                label="Nombre del contacto"
+                variant="outlined"
+                value={formData.nombreContacto}
+                onChange={handleChange('nombreContacto')}
+                sx={{
+                  flex: '1 1 250px',
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                label="Correo de contacto"
+                variant="outlined"
+                type="email"
+                value={formData.correoContacto}
+                onChange={handleChange('correoContacto')}
+                sx={{
+                  flex: '1 1 250px',
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Texto fijo */}
+            <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
+              <Typography variant="body1" sx={{ color: '#495057', lineHeight: 1.6 }}>
+                Señores "<strong>{formData.nombreEmpresa || '[NOMBRE DE LA EMPRESA]'}</strong>"<br />
+                De nuestra especial consideración:<br /><br />
+                Luego de extenderle un cordial saludo por medio de la presente, tenemos el agrado de hacerles llegar nuestra propuesta para atender su requerimiento.
+              </Typography>
+            </Paper>
+
             {/* Textarea condicional para Básico */}
             {formData.tipo === 'Básico' && (
               <TextField
@@ -941,27 +1143,6 @@ export const CotizadorForm: React.FC = () => {
                 }}
               />
             )}
-
-            {/* Servicio (Necesidad) */}
-            <TextField
-              label="SERVICIO (NECESIDAD)"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={6}
-              value={formData.servicioNecesidad}
-              onChange={handleChange('servicioNecesidad')}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#667eea',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
-                  },
-                },
-              }}
-            />
 
             {/* Sección de Características */}
             <Box>
@@ -1397,7 +1578,7 @@ export const CotizadorForm: React.FC = () => {
                     <TableHead>
                       <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '250px' }}>Descripción</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto (S/.)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto ($)</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Descuento</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Subtotal</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>IGV (18%)</TableCell>
@@ -1459,17 +1640,17 @@ export const CotizadorForm: React.FC = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
-                              S/. {item.subtotal.toFixed(2)}
+                              $ {item.subtotal.toFixed(2)}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
-                              S/. {item.igv.toFixed(2)}
+                              $ {item.igv.toFixed(2)}
                             </Typography>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2" sx={{ color: '#28a745', fontWeight: 'bold' }}>
-                              S/. {item.total.toFixed(2)}
+                              $ {item.total.toFixed(2)}
                             </Typography>
                           </TableCell>
                           <TableCell>
@@ -1503,7 +1684,7 @@ export const CotizadorForm: React.FC = () => {
                     Agregar Item
                   </Button>
                   <Typography variant="h6" sx={{ color: '#495057', fontWeight: 'bold' }}>
-                    Total: S/. {totales.totalPropuesta}
+                    Total: $ {totales.totalPropuesta}
                   </Typography>
                 </Box>
               </Paper>
@@ -1521,7 +1702,7 @@ export const CotizadorForm: React.FC = () => {
                     <TableHead>
                       <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '250px' }}>Descripción</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto (S/.)</TableCell>
+                        <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Monto ($)</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>IGV (18%)</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', minWidth: '120px' }}>Total</TableCell>
                         <TableCell sx={{ fontWeight: 'bold', width: '60px' }}>Acción</TableCell>
@@ -1571,12 +1752,12 @@ export const CotizadorForm: React.FC = () => {
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2" sx={{ color: '#495057', fontWeight: 'bold' }}>
-                                S/. {servicio.igv.toFixed(2)}
+                                $ {servicio.igv.toFixed(2)}
                               </Typography>
                             </TableCell>
                             <TableCell>
                               <Typography variant="body2" sx={{ color: '#28a745', fontWeight: 'bold' }}>
-                                S/. {servicio.total.toFixed(2)}
+                                $ {servicio.total.toFixed(2)}
                               </Typography>
                             </TableCell>
                             <TableCell>
@@ -1610,7 +1791,7 @@ export const CotizadorForm: React.FC = () => {
                     Agregar Servicio
                   </Button>
                   <Typography variant="h6" sx={{ color: '#495057', fontWeight: 'bold' }}>
-                    Total: S/. {totales.totalServicios}
+                    Total: $ {totales.totalServicios}
                   </Typography>
                 </Box>
               </Paper>
@@ -1622,7 +1803,7 @@ export const CotizadorForm: React.FC = () => {
                     TOTAL GENERAL
                   </Typography>
                   <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    S/. {totales.granTotal}
+                    $ {totales.granTotal}
                   </Typography>
                 </Box>
               </Paper>
@@ -1644,7 +1825,7 @@ export const CotizadorForm: React.FC = () => {
                   <strong>Moneda:</strong> Dólares Americanos.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Duración del Proyecto:</strong> El proyecto tiene una duración estimada de 90 días calendario, divididas en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días.
+                  <strong>Duración del Proyecto:</strong> {tiempoAnalizado || 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.'}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Variaciones en el Tiempo de Entrega:</strong>
@@ -1713,7 +1894,7 @@ export const CotizadorForm: React.FC = () => {
 
             {success && (
               <Alert severity="success" sx={{ mb: 2 }}>
-                ¡Cotización guardada exitosamente!
+                ¡Cotización PDF generada y descargada exitosamente!
               </Alert>
             )}
             
@@ -1722,6 +1903,7 @@ export const CotizadorForm: React.FC = () => {
                 type="submit"
                 variant="contained"
                 size="large"
+                startIcon={<PdfIcon />}
                 sx={{
                   px: 4,
                   py: 1.5,
@@ -1735,7 +1917,7 @@ export const CotizadorForm: React.FC = () => {
                   fontWeight: 'bold',
                 }}
               >
-                Generar Cotización
+                Generar Cotización PDF
               </Button>
             </Box>
           </Box>
