@@ -412,7 +412,7 @@ export const CotizadorForm: React.FC = () => {
     descripcionProyecto: '',
     urlAnalisis: '',
     detallePagina: '',
-    tiempoDesarrollo: 'El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario.',
+    duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
     crmSeleccionado: '',
     crmOtro: '',
   });
@@ -429,7 +429,6 @@ export const CotizadorForm: React.FC = () => {
 
   const [success, setSuccess] = useState(false);
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
-  const [tiempoAnalizado, setTiempoAnalizado] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -580,7 +579,7 @@ export const CotizadorForm: React.FC = () => {
       }
     }
 
-    // Limpiar campo "Otros" cuando se cambia la selección de CRM
+    // Limpiar campo "Otros" cuando se cambie la selección de CRM
     if (field === 'crmSeleccionado' && value !== 'Otros') {
       setFormData(prev => ({
         ...prev,
@@ -588,37 +587,7 @@ export const CotizadorForm: React.FC = () => {
         crmOtro: ''
       }));
     }
-
-    // Analizar tiempo de desarrollo cuando cambie
-    if (field === 'tiempoDesarrollo') {
-      analizarTiempoDesarrollo(value);
-    }
   };
-
-  const analizarTiempoDesarrollo = async (tiempo: string) => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/analizar-tiempo-desarrollo', {
-        tiempoDesarrollo: tiempo
-      });
-
-      if (response.data.success) {
-        setTiempoAnalizado(response.data.tiempoAnalizado);
-      } else {
-        // Fallback si falla el análisis
-        setTiempoAnalizado('El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario, divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.');
-      }
-    } catch (error) {
-      console.error('Error analizando tiempo de desarrollo:', error);
-      setTiempoAnalizado('El proyecto tendrá un tiempo de desarrollo de 3 meses o 90 días calendario, divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.');
-    }
-  };
-
-  // Analizar tiempo de desarrollo al cargar el componente
-  useEffect(() => {
-    if (formData.tiempoDesarrollo) {
-      analizarTiempoDesarrollo(formData.tiempoDesarrollo);
-    }
-  }, []);
 
   const handleAnalizarWeb = async () => {
     if (!formData.urlAnalisis) {
@@ -693,6 +662,11 @@ Por favor, verifique la URL e intente nuevamente.`
       setAnalizandoWeb(false);
     }
   };
+
+  // Analizar tiempo de desarrollo al cargar el componente
+  useEffect(() => {
+    // Removed tiempoDesarrollo functionality
+  }, []);
 
   const generarTextoServicio = (rubro: string, servicio: string): string => {
     const textos: { [key: string]: { [key: string]: string } } = {
@@ -802,13 +776,13 @@ Por favor, verifique la URL e intente nuevamente.`
         descripcionProyecto: formData.descripcionProyecto,
         urlAnalisis: formData.urlAnalisis,
         detallePagina: formData.detallePagina,
-        tiempoDesarrollo: formData.tiempoDesarrollo,
+        duracionProyecto: formData.duracionProyecto,
         crmSeleccionado: formData.crmSeleccionado,
         crmOtro: formData.crmOtro,
         caracteristicas: caracteristicas,
         itemsPropuesta: itemsPropuesta,
         serviciosAdicionales: serviciosAdicionales,
-        tiempoAnalizado: tiempoAnalizado
+        tiempoAnalizado: formData.duracionProyecto
       };
 
       // Generar PDF
@@ -1030,27 +1004,6 @@ Por favor, verifique la URL e intente nuevamente.`
               </FormControl>
             </Box>
 
-            {/* Servicio (Necesidad) */}
-            <TextField
-              label="SERVICIO (NECESIDAD)"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={6}
-              value={formData.servicioNecesidad}
-              onChange={handleChange('servicioNecesidad')}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#667eea',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
-                  },
-                },
-              }}
-            />
-
             {/* Descripción del proyecto */}
             <TextField
               label="Descripción del proyecto"
@@ -1207,7 +1160,7 @@ Por favor, verifique la URL e intente nuevamente.`
             {/* Proceso del Diseño */}
             <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
-                Proceso del Diseño:
+                Proceso del Diseño UX:
               </Typography>
               <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
@@ -1527,27 +1480,6 @@ Por favor, verifique la URL e intente nuevamente.`
                   )}
                 </Box>
               </Paper>
-
-              {/* Tiempo de desarrollo editable */}
-              <TextField
-                label="Tiempo de desarrollo:"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={2}
-                value={formData.tiempoDesarrollo}
-                onChange={handleChange('tiempoDesarrollo')}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
             </Box>
 
             {/* NUEVA SECCIÓN: PROPUESTA ECONÓMICA */}
@@ -1795,18 +1727,6 @@ Por favor, verifique la URL e intente nuevamente.`
                   </Typography>
                 </Box>
               </Paper>
-
-              {/* Total general */}
-              <Paper sx={{ p: 3, backgroundColor: '#28a745', color: 'white', mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    TOTAL GENERAL
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                    $ {totales.granTotal}
-                  </Typography>
-                </Box>
-              </Paper>
             </Box>
 
             {/* Condiciones */}
@@ -1825,8 +1745,27 @@ Por favor, verifique la URL e intente nuevamente.`
                   <strong>Moneda:</strong> Dólares Americanos.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Duración del Proyecto:</strong> {tiempoAnalizado || 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.'}
+                  <strong>Duración del Proyecto:</strong>
                 </Typography>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={formData.duracionProyecto}
+                  onChange={handleChange('duracionProyecto')}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  }}
+                />
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Variaciones en el Tiempo de Entrega:</strong>
                 </Typography>
