@@ -397,6 +397,127 @@ const RobotThinking: React.FC = () => {
   );
 };
 
+// Componente específico para mejora de requerimientos
+const RobotMejorandoRequerimientos: React.FC = () => {
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      p: 4 
+    }}>
+      <Box sx={{ 
+        position: 'relative',
+        animation: 'bounce 2s infinite',
+        '@keyframes bounce': {
+          '0%, 20%, 53%, 80%, 100%': {
+            transform: 'translate3d(0,0,0)',
+          },
+          '40%, 43%': {
+            transform: 'translate3d(0, -15px, 0)',
+          },
+          '70%': {
+            transform: 'translate3d(0, -7px, 0)',
+          },
+          '90%': {
+            transform: 'translate3d(0, -3px, 0)',
+          },
+        },
+      }}>
+        <RobotIcon sx={{ 
+          fontSize: 60, 
+          color: '#667eea',
+          filter: 'drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))',
+        }} />
+        <Box sx={{
+          position: 'absolute',
+          top: -10,
+          right: -10,
+          animation: 'pulse 1.5s infinite',
+          '@keyframes pulse': {
+            '0%': {
+              transform: 'scale(1)',
+              opacity: 1,
+            },
+            '50%': {
+              transform: 'scale(1.2)',
+              opacity: 0.7,
+            },
+            '100%': {
+              transform: 'scale(1)',
+              opacity: 1,
+            },
+          },
+        }}>
+          <CircularProgress size={20} sx={{ color: '#764ba2' }} />
+        </Box>
+      </Box>
+      <Typography variant="h6" sx={{ mt: 2, color: '#667eea', fontWeight: 'bold' }}>
+        Mejorando requerimientos...
+      </Typography>
+      <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1, maxWidth: 300 }}>
+        🤖 Analizando requerimientos técnicos<br/>
+        ✨ Generando características mejoradas<br/>
+        🎯 Optimizando para el sector<br/>
+        💡 Aplicando mejores prácticas
+      </Typography>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 1, 
+        mt: 3,
+        animation: 'dots 1.5s infinite',
+        '@keyframes dots': {
+          '0%, 20%': {
+            color: '#667eea',
+          },
+          '50%': {
+            color: '#764ba2',
+          },
+          '80%, 100%': {
+            color: '#667eea',
+          },
+        },
+      }}>
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot1 1.5s infinite',
+          '@keyframes dot1': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+        }} />
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot2 1.5s infinite',
+          '@keyframes dot2': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+          animationDelay: '0.2s',
+        }} />
+        <Box sx={{ 
+          width: 8, 
+          height: 8, 
+          borderRadius: '50%', 
+          backgroundColor: 'currentColor',
+          animation: 'dot3 1.5s infinite',
+          '@keyframes dot3': {
+            '0%, 80%, 100%': { opacity: 0 },
+            '40%': { opacity: 1 },
+          },
+          animationDelay: '0.4s',
+        }} />
+      </Box>
+    </Box>
+  );
+};
+
 export const CotizadorForm: React.FC = () => {
   const [formData, setFormData] = useState({
     fecha: '',
@@ -408,6 +529,7 @@ export const CotizadorForm: React.FC = () => {
     servicio: '',
     tipo: '',
     promptsRequerimientos: '',
+    requerimientosMejorados: '',
     servicioNecesidad: '',
     descripcionProyecto: '',
     urlAnalisis: '',
@@ -429,6 +551,7 @@ export const CotizadorForm: React.FC = () => {
 
   const [success, setSuccess] = useState(false);
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
+  const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -693,47 +816,46 @@ Por favor, verifique la URL e intente nuevamente.`
   const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
     try {
       const response = await axios.post('http://localhost:3000/api/generar-descripcion-proyecto', {
-        rubro: rubro,
-        servicio: servicio
+        rubro,
+        servicio
       });
 
-      if (response.data.success) {
+      if (response.data && response.data.descripcion) {
         setFormData(prev => ({
           ...prev,
           descripcionProyecto: response.data.descripcion
         }));
-      } else {
-        // Fallback con descripción local si el endpoint falla
-        const descripciones: { [key: string]: { [key: string]: string } } = {
-          'Inmobiliario': {
-            'Landing': 'Este proyecto consiste en la creación de una página web de landing page para una empresa inmobiliaria. El objetivo principal es captar la atención de los visitantes y proporcionar una experiencia de usuario fluida y profesional.',
-            'E-Commerce': 'La plataforma de comercio electrónico permitirá a los clientes explorar, comparar y adquirir propiedades de manera eficiente. Incluye un sistema de búsqueda avanzado, filtros de precios, tours virtuales y un carrito de compras interactivo.',
-            'Aplicación': 'Una aplicación móvil especializada para el sector inmobiliario, permitirá a los usuarios acceder a la información de propiedades, visualizar tours virtuales, y mantenerse informados sobre las últimas ofertas y noticias del mercado.'
-          },
-          'Retail': {
-            'E-Commerce': 'Este proyecto de comercio electrónico para retail implica la creación de una plataforma moderna y atractiva para un negocio de venta minorista. Incluye un catálogo de productos, sistema de pagos seguro, y una experiencia de usuario intuitiva para los clientes.',
-            'Landing': 'Una página web de landing page para retail, diseñada para captar la atención de los visitantes y convertirlos en compradores potenciales. Incluye un diseño atractivo, información sobre productos, y un formulario de contacto efectivo.',
-            'Aplicación': 'Una aplicación móvil para retail, que permitirá a los clientes acceder al catálogo de productos, realizar compras, recibir notificaciones de ofertas y mantenerse actualizados sobre el inventario.'
-          },
-          'Financiero': {
-            'Landing': 'Este proyecto de página web de landing page para el sector financiero, tiene como objetivo transmitir la confianza y seguridad de la institución. Incluye información sobre servicios, historial, y un diseño profesional que refleje la credibilidad del negocio.',
-            'Aplicación': 'Una aplicación financiera segura, que permitirá a los usuarios gestionar sus finanzas, realizar transacciones, y acceder a servicios bancarios de manera conveniente. Incluye un diseño intuitivo y una experiencia de usuario fluida.',
-            'Web Multiproyecto': 'Un ecosistema web completo para servicios financieros, que integra múltiples productos y servicios bajo una marca cohesiva. Incluye un sistema de gestión de contenido, integración con API de terceros, y un diseño moderno.'
-          }
-        };
-
-        setFormData(prev => ({
-          ...prev,
-          descripcionProyecto: descripciones[rubro]?.[servicio] || `Este proyecto de ${servicio.toLowerCase()} para el sector ${rubro.toLowerCase()} consiste en la creación de una plataforma digital que cumpla con los requisitos de funcionalidad, diseño y optimización para SEO.`
-        }));
       }
     } catch (error) {
       console.error('Error generando descripción del proyecto:', error);
-      // Fallback con descripción básica
-      setFormData(prev => ({
-        ...prev,
-        descripcionProyecto: `Este proyecto de ${servicio.toLowerCase()} para el sector ${rubro.toLowerCase()} consiste en la creación de una plataforma digital moderna y funcional.`
-      }));
+    }
+  };
+
+  const mejorarRequerimientosConIA = async () => {
+    if (!formData.promptsRequerimientos.trim()) {
+      alert('Por favor, ingrese los requerimientos técnicos antes de mejorarlos.');
+      return;
+    }
+
+    setMejorandoRequerimientos(true);
+    try {
+      const response = await axios.post('http://localhost:3000/api/mejorar-requerimientos', {
+        requerimientos: formData.promptsRequerimientos,
+        rubro: formData.rubro,
+        servicio: formData.servicio
+      });
+
+      if (response.data && response.data.requerimientosMejorados) {
+        setFormData(prev => ({
+          ...prev,
+          requerimientosMejorados: response.data.requerimientosMejorados
+        }));
+      }
+    } catch (error) {
+      console.error('Error mejorando requerimientos:', error);
+      alert('Error al mejorar los requerimientos. Por favor, intente nuevamente.');
+    } finally {
+      setMejorandoRequerimientos(false);
     }
   };
 
@@ -772,6 +894,7 @@ Por favor, verifique la URL e intente nuevamente.`
         servicio: formData.servicio,
         tipo: formData.tipo,
         promptsRequerimientos: formData.promptsRequerimientos,
+        requerimientosMejorados: formData.requerimientosMejorados,
         servicioNecesidad: formData.servicioNecesidad,
         descripcionProyecto: formData.descripcionProyecto,
         urlAnalisis: formData.urlAnalisis,
@@ -1026,6 +1149,80 @@ Por favor, verifique la URL e intente nuevamente.`
               }}
             />
 
+            {/* Textarea condicional para Básico */}
+            {formData.tipo === 'Básico' && (
+              <Box>
+                <TextField
+                  label="Prompts de requerimientos técnicos"
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  value={formData.promptsRequerimientos}
+                  onChange={handleChange('promptsRequerimientos')}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  }}
+                />
+                
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                  <Button
+                    onClick={mejorarRequerimientosConIA}
+                    variant="contained"
+                    startIcon={<RobotIcon />}
+                    disabled={mejorandoRequerimientos}
+                    sx={{
+                      backgroundColor: '#667eea',
+                      '&:hover': {
+                        backgroundColor: '#5a6fd8',
+                      },
+                      '&:disabled': {
+                        backgroundColor: '#ccc',
+                      },
+                    }}
+                  >
+                    {mejorandoRequerimientos ? 'Mejorando...' : 'Mejorar con IA'}
+                  </Button>
+                </Box>
+
+                {/* Card con resultado mejorado */}
+                {formData.requerimientosMejorados && (
+                  <Card sx={{ mt: 3, backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                    <CardContent>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
+                        Requerimientos Técnicos Mejorados:
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={formData.requerimientosMejorados}
+                        onChange={handleChange('requerimientosMejorados')}
+                        placeholder="Requerimientos técnicos mejorados..."
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            '&:hover fieldset': {
+                              borderColor: '#667eea',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#667eea',
+                            },
+                          },
+                        }}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+              </Box>
+            )}
+
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
               <TextField
                 label="Nombre del contacto"
@@ -1073,29 +1270,6 @@ Por favor, verifique la URL e intente nuevamente.`
                 Luego de extenderle un cordial saludo por medio de la presente, tenemos el agrado de hacerles llegar nuestra propuesta para atender su requerimiento.
               </Typography>
             </Paper>
-
-            {/* Textarea condicional para Básico */}
-            {formData.tipo === 'Básico' && (
-              <TextField
-                label="Prompts de requerimientos técnicos"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                value={formData.promptsRequerimientos}
-                onChange={handleChange('promptsRequerimientos')}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-            )}
 
             {/* Sección de Características */}
             <Box>
@@ -1162,21 +1336,26 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
                 Proceso del Diseño UX:
               </Typography>
-              <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Investigación:</strong> Conocimiento de las necesidades del usuario
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span><strong>Investigación:</strong> Conocimiento de las necesidades del usuario</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Evaluación:</strong> Evaluaciones heurísticas, benchmarks, pruebas de usabilidad
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span><strong>Evaluación:</strong> Evaluaciones heurísticas, benchmarks, pruebas de usabilidad</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Arquitectura navegación:</strong> Flujo (mapa) de la información
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span><strong>Arquitectura navegación:</strong> Flujo (mapa) de la información</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Arquitectura de cada una de las páginas:</strong> Wireframes (prototipo navegable)
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span><strong>Arquitectura de cada una de las páginas:</strong> Wireframes (prototipo navegable)</span>
                 </Typography>
-                <Typography variant="body1">
-                  <strong>Presentación</strong>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span><strong>Presentación</strong></span>
                 </Typography>
               </Box>
             </Paper>
@@ -1186,24 +1365,30 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
                 Proceso del Diseño UI:
               </Typography>
-              <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Diseño de interacción.
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de interacción.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Guías de interacción.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guías de interacción.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Diseño de elementos: botones, documentos, etc.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de elementos: botones, documentos, etc.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Diseño visual: iconos, imágenes, ilustraciones.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño visual: iconos, imágenes, ilustraciones.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Guías de estilo: paletas de colores, tipografías.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guías de estilo: paletas de colores, tipografías.</span>
                 </Typography>
-                <Typography variant="body1">
-                  Diseño de cada una de las páginas: Prototipo navegable web y móvil.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de cada una de las páginas: Prototipo navegable web y móvil.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1213,21 +1398,26 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
                 Proceso de Análisis SEO:
               </Typography>
-              <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Análisis, búsqueda y creación de Keywords para posicionamiento web.
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Análisis, búsqueda y creación de Keywords para posicionamiento web.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Correcto nombramiento de archivos.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Correcto nombramiento de archivos.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Nomenclatura de páginas internas y proyectos.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Nomenclatura de páginas internas y proyectos.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Detalle de Metatags.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Detalle de Metatags.</span>
                 </Typography>
-                <Typography variant="body1">
-                  Listado de Inlinks y outlinks.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Listado de Inlinks y outlinks.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1237,18 +1427,22 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
                 Entregables:
               </Typography>
-              <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Diseño navegable en Figma.
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño navegable en Figma.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Guía de estilos.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guía de estilos.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Exportación de elementos visuales en .svg .webp .png .jpg
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Exportación de elementos visuales en .svg .webp .png .jpg</span>
                 </Typography>
-                <Typography variant="body1">
-                  Informe SEO con listado de palabras, tags, keywords por proyecto.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Informe SEO con listado de palabras, tags, keywords por proyecto.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1258,30 +1452,38 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
                 Maquetación web y mobile:
               </Typography>
-              <Box sx={{ color: '#6c757d', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Implementación del diseño web y mobile en ambiente de desarrollo.
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación del diseño web y mobile en ambiente de desarrollo.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Integración de leads desde todos los formularios a CRM
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Integración de leads desde todos los formularios a CRM</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Implementación y optimización SEO básica para mejorar la visibilidad del sitio web en los motores de búsqueda.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación y optimización SEO básica para mejorar la visibilidad del sitio web en los motores de búsqueda.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Integración de Google Analytics para el seguimiento y análisis del tráfico web.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Integración de Google Analytics para el seguimiento y análisis del tráfico web.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Implementación de mapa de calor con Clarity.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación de mapa de calor con Clarity.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  QA, pruebas unitarias y performance.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>QA, pruebas unitarias y performance.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Pase a producción.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Pase a producción.</span>
                 </Typography>
-                <Typography variant="body1">
-                  Implementación de un sistema de gestión de contenido (CMS) para facilitar la administración y actualización del sitio web.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación de un sistema de gestión de contenido (CMS) para facilitar la administración y actualización del sitio web.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1291,24 +1493,30 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#856404', fontWeight: 'bold' }}>
                 Consideraciones:
               </Typography>
-              <Box sx={{ color: '#856404', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Deberá proveer la redacción del contenido de la página web.
+              <Box sx={{ color: '#856404', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer la redacción del contenido de la página web.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Deberá proveer un banco de fotos, vídeos e imágenes en alta calidad o en formatos de edición.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer un banco de fotos, vídeos e imágenes en alta calidad o en formatos de edición.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Deberá proveer las ilustraciones de personajes, mascotas u otros que se desee incluir en el diseño.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer las ilustraciones de personajes, mascotas u otros que se desee incluir en el diseño.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  El diseño y desarrollo solo considera el idioma español.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>El diseño y desarrollo solo considera el idioma español.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Soporte técnico y mantenimiento básico durante un período inicial de 12 meses después del lanzamiento del sitio web.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Soporte técnico y mantenimiento básico durante un período inicial de 12 meses después del lanzamiento del sitio web.</span>
                 </Typography>
-                <Typography variant="body1">
-                  El costo final y el tiempo de entrega están sujetos a cambios según los requisitos adicionales del cliente y los ajustes solicitados durante el proceso de desarrollo.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>El costo final y el tiempo de entrega están sujetos a cambios según los requisitos adicionales del cliente y los ajustes solicitados durante el proceso de desarrollo.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1318,15 +1526,18 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 2, color: '#721c24', fontWeight: 'bold' }}>
                 No incluye:
               </Typography>
-              <Box sx={{ color: '#721c24', lineHeight: 1.8 }}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Toma de Fotografía, creación o edición de videos.
+              <Box sx={{ color: '#721c24', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Toma de Fotografía, creación o edición de videos.</span>
                 </Typography>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                  Redacción de contenido.
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Redacción de contenido.</span>
                 </Typography>
-                <Typography variant="body1">
-                  Diseño de Ilustraciones e imágenes.
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de Ilustraciones e imágenes.</span>
                 </Typography>
               </Box>
             </Paper>
@@ -1796,7 +2007,7 @@ Por favor, verifique la URL e intente nuevamente.`
                 FIRMA:
               </Typography>
               
-              {/* Imagen dummy de firma */}
+              {/* Imagen de firma */}
               <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
@@ -1806,13 +2017,35 @@ Por favor, verifique la URL e intente nuevamente.`
                 borderRadius: 2,
                 backgroundColor: '#f8f9fa'
               }}>
+                <img 
+                  src="/images/firma.png" 
+                  alt="Firma"
+                  style={{
+                    width: '250px',
+                    height: '100px',
+                    objectFit: 'contain',
+                    backgroundColor: 'white',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '4px',
+                    padding: '8px'
+                  }}
+                  onError={(e) => {
+                    // Si la imagen no existe, mostrar placeholder
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const placeholder = target.nextElementSibling as HTMLElement;
+                    if (placeholder) {
+                      placeholder.style.display = 'flex';
+                    }
+                  }}
+                />
                 <Box sx={{
-                  width: 200,
-                  height: 80,
+                  width: 250,
+                  height: 100,
                   backgroundColor: 'white',
                   border: '1px solid #dee2e6',
                   borderRadius: 1,
-                  display: 'flex',
+                  display: 'none',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '24px',
@@ -1875,6 +2108,21 @@ Por favor, verifique la URL e intente nuevamente.`
       >
         <DialogContent>
           <RobotThinking />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para mostrar animación del robot en mejora de requerimientos */}
+      <Dialog
+        open={mejorandoRequerimientos}
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: 3,
+            minWidth: '400px',
+          },
+        }}
+      >
+        <DialogContent>
+          <RobotMejorandoRequerimientos />
         </DialogContent>
       </Dialog>
     </Box>

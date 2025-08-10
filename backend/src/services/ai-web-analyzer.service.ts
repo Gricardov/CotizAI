@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface SectionAnalysis {
   name: string;
@@ -29,6 +30,12 @@ interface AIAnalysisRequest {
 
 @Injectable()
 export class AIWebAnalyzerService {
+  private readonly genAI: GoogleGenerativeAI;
+
+  constructor() {
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  }
+
   private readonly SECTOR_SECTIONS: Record<string, Record<string, Array<{name: string, description: string, required: boolean}>>> = {
     'Inmobiliario': {
       'Landing': [
@@ -303,6 +310,9 @@ export class AIWebAnalyzerService {
       // Extraer información básica
       const title = $('title').text() || 'Sin título';
       
+      // Extraer contenido de la página para análisis
+      const pageContent = this.extractPageContent($);
+      
       // Detectar secciones existentes usando IA
       const existingSections = await this.detectExistingSections($, request);
       
@@ -318,8 +328,8 @@ export class AIWebAnalyzerService {
       // Calcular score
       const score = this.calculateStructureScore(existingSections, expectedSections);
       
-      // Generar análisis general
-      const overallAnalysis = this.generateOverallAnalysis(request, existingSections, missingSections, score);
+      // Generar análisis general usando Gemini AI
+      const overallAnalysis = await this.generateOverallAnalysisWithAI(request, pageContent, existingSections, missingSections);
 
       return {
         url: urlToAnalyze,
@@ -333,8 +343,160 @@ export class AIWebAnalyzerService {
 
     } catch (error) {
       console.error('Error analyzing website structure:', error);
+      
+      // Si es un error de la API de Gemini, propagar el error 500
+      if (error instanceof Error && error.message.includes('Error interno del servidor')) {
+        throw error;
+      }
+      
+      // Para otros errores, usar fallback
       return this.generateFallbackAnalysis(request);
     }
+  }
+
+  private extractPageContent($: cheerio.CheerioAPI): string {
+    // Extraer contenido relevante de la página
+    const content: string[] = [];
+    
+    // Título de la página
+    const title = $('title').text();
+    if (title) content.push(`Título: ${title}`);
+    
+    // Meta descripción
+    const metaDescription = $('meta[name="description"]').attr('content');
+    if (metaDescription) content.push(`Descripción: ${metaDescription}`);
+    
+    // Navegación
+    const navigation = $('nav, .nav, .menu, header').text().trim();
+    if (navigation) content.push(`Navegación: ${navigation.substring(0, 500)}`);
+    
+    // Contenido principal
+    const mainContent = $('main, .main, .content, .container').text().trim();
+    if (mainContent) content.push(`Contenido principal: ${mainContent.substring(0, 1000)}`);
+    
+    // Formularios
+    const forms = $('form').length;
+    content.push(`Formularios encontrados: ${forms}`);
+    
+    // Enlaces
+    const links = $('a').map((i, el) => $(el).text().trim()).get().filter(text => text.length > 0);
+    content.push(`Enlaces de navegación: ${links.slice(0, 20).join(', ')}`);
+    
+    // Imágenes
+    const images = $('img').length;
+    content.push(`Imágenes encontradas: ${images}`);
+    
+    return content.join('\n\n');
+  }
+
+  private async generateOverallAnalysisWithAI(
+    request: AIAnalysisRequest,
+    pageContent: string,
+    existingSections: SectionAnalysis[],
+    missingSections: SectionAnalysis[]
+  ): Promise<string> {
+    try {
+      const model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      
+      // Combinar todas las secciones (existentes y faltantes)
+      const allSections = [
+        ...existingSections.map(section => ({ ...section, status: 'encontrada' })),
+        ...missingSections.map(section => ({ ...section, status: 'faltante' }))
+      ];
+      
+      const prompt = `Analiza el contenido de esta página web y genera un análisis de estructura web para el sector ${request.rubro} y servicio ${request.servicio}.
+
+CONTENIDO DE LA PÁGINA:
+${pageContent}
+
+TODAS LAS SECCIONES (ENCONTRADAS Y FALTANTES):
+${allSections.map(section => `- ${section.name}: ${section.description} (${section.status})`).join('\n')}
+
+Genera un análisis estructurado en el siguiente formato exacto:
+
+ANÁLISIS DE ESTRUCTURA WEB - SECTOR ${request.rubro.toUpperCase()}
+
+1. [Nombre de la sección]:
+[Descripción de lo que contiene o debería contener la sección]
+[Otra característica de la sección]
+[Otra característica de la sección]
+
+2. [Otra sección]:
+[Descripción de lo que contiene o debería contener la sección]
+[Otra característica de la sección]
+
+[Continuar con TODAS las secciones relevantes para el sector, tanto las que existen como las que faltan]
+
+IMPORTANTE:
+- NO uses iconos ✅ o ❌
+- NO incluyas scores o puntuaciones
+- NO distingas entre secciones encontradas y faltantes en el texto
+- Incluye TODAS las secciones relevantes para el sector
+- Para secciones encontradas, describe lo que realmente contiene
+- Para secciones faltantes, describe lo que debería contener
+- Usa un lenguaje profesional y técnico
+- Mantén el formato exacto solicitado
+- No inventes contenido que no esté en el análisis de la página
+- Combina las secciones de forma natural, sin mencionar si existen o faltan
+
+Genera solo el análisis estructurado, sin introducciones ni conclusiones adicionales.`;
+
+      const result = await model.generateContent({
+        contents: [{
+          role: "user",
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          temperature: 0.1,
+          topK: 32,
+          topP: 1,
+          maxOutputTokens: 8192,
+        }
+      });
+
+      const response = await result.response;
+      const candidates = response.candidates;
+      
+      if (candidates && candidates.length > 0 && candidates[0].content.parts.length > 0) {
+        const text = candidates[0].content.parts[0].text;
+        return text || 'No se pudo generar el análisis';
+      } else {
+        throw new Error('No response from Gemini AI');
+      }
+
+    } catch (error) {
+      console.error('Error generating analysis with Gemini:', error);
+      // Si falla la API, devolver error 500
+      throw new Error('Error interno del servidor al analizar la página web');
+    }
+  }
+
+  private generateFallbackAnalysisText(
+    request: AIAnalysisRequest,
+    existingSections: SectionAnalysis[],
+    missingSections: SectionAnalysis[]
+  ): string {
+    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR ${request.rubro.toUpperCase()}\n\n`;
+    
+    // Agregar secciones encontradas
+    if (existingSections.length > 0) {
+      analysis += `SECCIONES ENCONTRADAS:\n`;
+      existingSections.forEach((section, index) => {
+        analysis += `${index + 1}. ${section.name}:\n`;
+        analysis += `${section.description}\n\n`;
+      });
+    }
+    
+    // Agregar secciones faltantes
+    if (missingSections.length > 0) {
+      analysis += `SECCIONES FALTANTES:\n`;
+      missingSections.forEach((section, index) => {
+        analysis += `${index + 1}. ${section.name}:\n`;
+        analysis += `${section.description}\n\n`;
+      });
+    }
+    
+    return analysis;
   }
 
   private async detectExistingSections($: cheerio.CheerioAPI, request: AIAnalysisRequest): Promise<SectionAnalysis[]> {
@@ -617,350 +779,6 @@ export class AIWebAnalyzerService {
     const criticalScore = (criticalFound / criticalExpected) * 40;
     
     return Math.round(basicScore + criticalScore);
-  }
-
-  private generateOverallAnalysis(
-    request: AIAnalysisRequest,
-    existingSections: SectionAnalysis[],
-    missingSections: SectionAnalysis[],
-    score: number
-  ): string {
-    const criticalMissing = missingSections.filter(section => 
-      this.isCriticalSection(section.name, request.rubro)
-    );
-    
-    // Generar análisis en formato específico según el rubro
-    if (request.rubro === 'Inmobiliario') {
-      return this.generateInmobiliarioAnalysis(existingSections, missingSections);
-    } else if (request.rubro === 'Retail') {
-      return this.generateRetailAnalysis(existingSections, missingSections);
-    } else if (request.rubro === 'Financiero') {
-      return this.generateFinancieroAnalysis(existingSections, missingSections);
-    }
-    
-    // Análisis genérico para otros rubros
-    return this.generateGenericAnalysis(existingSections, missingSections, request.rubro);
-  }
-
-  private generateInmobiliarioAnalysis(existingSections: SectionAnalysis[], missingSections: SectionAnalysis[]): string {
-    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR INMOBILIARIO\n\n`;
-    
-    // Sección 1: Inicio (Home)
-    const hasInicio = existingSections.find(s => s.name.toLowerCase().includes('inicio') || s.name.toLowerCase().includes('home'));
-    analysis += `1. Inicio (Home):\n`;
-    if (hasInicio) {
-      analysis += `✅ Cabecera (Header): Contiene el logotipo de la empresa y un menú de navegación.\n`;
-      analysis += `✅ Slider de Imágenes: Presenta video o imágenes de proyectos inmobiliarios destacados con textos llamativos\n`;
-      analysis += `✅ Destacados de Proyectos: Sección que muestra algunos proyectos destacados de la empresa.\n`;
-      analysis += `✅ Filtro de búsqueda personalizado.\n`;
-      analysis += `✅ Formulario de cotiza tu depa.\n`;
-      analysis += `✅ Footer: Incluye enlaces a páginas importantes, información de contacto y enlaces a redes sociales.\n`;
-    } else {
-      analysis += `❌ Cabecera (Header): Contiene el logotipo de la empresa y un menú de navegación.\n`;
-      analysis += `❌ Slider de Imágenes: Presenta video o imágenes de proyectos inmobiliarios destacados con textos llamativos\n`;
-      analysis += `❌ Destacados de Proyectos: Sección que muestra algunos proyectos destacados de la empresa.\n`;
-      analysis += `❌ Filtro de búsqueda personalizado.\n`;
-      analysis += `❌ Formulario de cotiza tu depa.\n`;
-      analysis += `❌ Footer: Incluye enlaces a páginas importantes, información de contacto y enlaces a redes sociales.\n`;
-    }
-    
-    // Sección 2: Nosotros
-    const hasNosotros = existingSections.find(s => s.name.toLowerCase().includes('nosotros') || s.name.toLowerCase().includes('about'));
-    analysis += `\n2. Nosotros:\n`;
-    if (hasNosotros) {
-      analysis += `✅ Historia de la Empresa: Información sobre la historia, valores y filosofía de la empresa.\n`;
-      analysis += `✅ Nuestros proyectos en una línea de tiempo.\n`;
-      analysis += `✅ Formulario de cotiza tu nuevo tu depa.\n`;
-    } else {
-      analysis += `❌ Historia de la Empresa: Información sobre la historia, valores y filosofía de la empresa.\n`;
-      analysis += `❌ Nuestros proyectos en una línea de tiempo.\n`;
-      analysis += `❌ Formulario de cotiza tu nuevo tu depa.\n`;
-    }
-    
-    // Sección 3: Proyectos
-    const hasProyectos = existingSections.find(s => s.name.toLowerCase().includes('proyecto') || s.name.toLowerCase().includes('propiedad'));
-    analysis += `\n3. Proyectos:\n`;
-    if (hasProyectos) {
-      analysis += `✅ Galería de Proyectos: Presenta una lista de proyectos inmobiliarios desarrollados por la empresa.\n`;
-      analysis += `✅ Filtros de Búsqueda: Filtro básico de proyectos por ubicación y tipo (departamentos, casas, etc.). Filtro avanzado por cantidad de dormitorios, baños, metraje, áreas comunes.\n`;
-      analysis += `✅ Páginas de Proyectos Individuales: Cada proyecto tiene su propia página con imágenes, descripción y detalles específicos.\n`;
-    } else {
-      analysis += `❌ Galería de Proyectos: Presenta una lista de proyectos inmobiliarios desarrollados por la empresa.\n`;
-      analysis += `❌ Filtros de Búsqueda: Filtro básico de proyectos por ubicación y tipo (departamentos, casas, etc.). Filtro avanzado por cantidad de dormitorios, baños, metraje, áreas comunes.\n`;
-      analysis += `❌ Páginas de Proyectos Individuales: Cada proyecto tiene su propia página con imágenes, descripción y detalles específicos.\n`;
-    }
-    
-    // Sección 4: Detalle del proyecto
-    analysis += `\n4. Detalle del proyecto:\n`;
-    analysis += `✅ Slider del proyecto: Presenta video o imagen del proyecto, con textos llamativos, destacando características importantes como distrito o estado.\n`;
-    analysis += `✅ Presentación del proyecto: Breve descripción resaltando sus beneficios.\n`;
-    analysis += `✅ Detalles del proyecto: Listado iconográfico de las características del proyecto, imagen de fachada del proyecto y botones de llamada a la acción para descargar brochure u otra información relevante.\n`;
-    analysis += `✅ Avances de Obra: Línea temporal del proyecto y su avance en cada estado.\n`;
-    analysis += `✅ Concepto: Presentación y sustento del concepto del proyecto, reforzado con imágenes y texto.\n`;
-    analysis += `✅ Galería de imágenes de interiores.\n`;
-    analysis += `✅ Galería de imágenes de áreas comunes.\n`;
-    analysis += `✅ Recorrido virtual.\n`;
-    analysis += `✅ Video del proyecto.\n`;
-    analysis += `✅ Mapa de ubicación de Google Maps con filtros de lugares de interés, y llamada de acción para ir con Google o Waze.\n`;
-    analysis += `✅ Formulario de cotización: Listado de planos y tipologías con filtros por cantidad de dormitorios, baños, piso u otros de interés.\n`;
-    analysis += `✅ Listado de asesores con su información de contacto y ubicación de la sala de ventas.\n`;
-    analysis += `✅ Listado de otros proyectos que pueden ser de interés para el usuario.\n`;
-    
-    // Sección 5: Vende tu terreno
-    const hasVendeTerreno = existingSections.find(s => s.name.toLowerCase().includes('vende') || s.name.toLowerCase().includes('terreno'));
-    analysis += `\n5. Vende tu terreno:\n`;
-    if (hasVendeTerreno) {
-      analysis += `✅ Imagen y descripción de los premios y beneficios de pertenecer al programa de referidos.\n`;
-      analysis += `✅ Pasos a seguir para poder referir.\n`;
-      analysis += `✅ Formulario de Déjanos tus datos y datos de la persona a quien refiere.\n`;
-    } else {
-      analysis += `❌ Imagen y descripción de los premios y beneficios de pertenecer al programa de referidos.\n`;
-      analysis += `❌ Pasos a seguir para poder referir.\n`;
-      analysis += `❌ Formulario de Déjanos tus datos y datos de la persona a quien refiere.\n`;
-    }
-    
-    // Sección 6: Refiere y gana
-    const hasBlog = existingSections.find(s => s.name.toLowerCase().includes('blog') || s.name.toLowerCase().includes('noticia'));
-    analysis += `\n6. Refiere y gana:\n`;
-    if (hasBlog) {
-      analysis += `✅ Blog o Noticias: Artículos sobre novedades, eventos o noticias relacionadas con la empresa y la industria inmobiliaria.\n`;
-    } else {
-      analysis += `❌ Blog o Noticias: Artículos sobre novedades, eventos o noticias relacionadas con la empresa y la industria inmobiliaria.\n`;
-    }
-    
-    // Sección 7: Contacto
-    const hasContacto = existingSections.find(s => s.name.toLowerCase().includes('contacto') || s.name.toLowerCase().includes('contact'));
-    analysis += `\n7. Contacto:\n`;
-    if (hasContacto) {
-      analysis += `✅ Formulario de cotiza tu nuevo tu depa.\n`;
-    } else {
-      analysis += `❌ Formulario de cotiza tu nuevo tu depa.\n`;
-    }
-    
-    return analysis;
-  }
-
-  private generateRetailAnalysis(existingSections: SectionAnalysis[], missingSections: SectionAnalysis[]): string {
-    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR RETAIL\n\n`;
-    
-    // Sección 1: Inicio (Home)
-    const hasInicio = existingSections.find(s => s.name.toLowerCase().includes('inicio') || s.name.toLowerCase().includes('home'));
-    analysis += `1. Inicio (Home):\n`;
-    if (hasInicio) {
-      analysis += `✅ Cabecera (Header): Contiene el logotipo de la empresa y un menú de navegación.\n`;
-      analysis += `✅ Catálogo de Productos: Productos destacados con galería atractiva.\n`;
-      analysis += `✅ Ofertas y Promociones: Sección de ofertas especiales y descuentos.\n`;
-      analysis += `✅ Newsletter: Suscripción para ofertas exclusivas.\n`;
-      analysis += `✅ Testimonios: Opiniones de clientes satisfechos.\n`;
-      analysis += `✅ Footer: Enlaces importantes, información de contacto y redes sociales.\n`;
-    } else {
-      analysis += `❌ Cabecera (Header): Contiene el logotipo de la empresa y un menú de navegación.\n`;
-      analysis += `❌ Catálogo de Productos: Productos destacados con galería atractiva.\n`;
-      analysis += `❌ Ofertas y Promociones: Sección de ofertas especiales y descuentos.\n`;
-      analysis += `❌ Newsletter: Suscripción para ofertas exclusivas.\n`;
-      analysis += `❌ Testimonios: Opiniones de clientes satisfechos.\n`;
-      analysis += `❌ Footer: Enlaces importantes, información de contacto y redes sociales.\n`;
-    }
-    
-    // Sección 2: Catálogo de Productos
-    const hasCatalogo = existingSections.find(s => s.name.toLowerCase().includes('catalogo') || s.name.toLowerCase().includes('producto'));
-    analysis += `\n2. Catálogo de Productos:\n`;
-    if (hasCatalogo) {
-      analysis += `✅ Lista completa de productos con categorías y filtros.\n`;
-      analysis += `✅ Sistema de carrito de compras optimizado.\n`;
-      analysis += `✅ Múltiples opciones de pago seguras.\n`;
-      analysis += `✅ Sistema de inventario en tiempo real.\n`;
-      analysis += `✅ Reviews y ratings de productos.\n`;
-      analysis += `✅ Wishlist personalizada.\n`;
-    } else {
-      analysis += `❌ Lista completa de productos con categorías y filtros.\n`;
-      analysis += `❌ Sistema de carrito de compras optimizado.\n`;
-      analysis += `❌ Múltiples opciones de pago seguras.\n`;
-      analysis += `❌ Sistema de inventario en tiempo real.\n`;
-      analysis += `❌ Reviews y ratings de productos.\n`;
-      analysis += `❌ Wishlist personalizada.\n`;
-    }
-    
-    // Sección 3: Programa de Lealtad
-    analysis += `\n3. Programa de Lealtad:\n`;
-    analysis += `✅ Sistema de puntos y recompensas.\n`;
-    analysis += `✅ Historial de compras del cliente.\n`;
-    analysis += `✅ Ofertas exclusivas para miembros.\n`;
-    analysis += `✅ Niveles de membresía con beneficios diferenciados.\n`;
-    
-    // Sección 4: Comparador de Precios
-    analysis += `\n4. Comparador de Precios:\n`;
-    analysis += `✅ Comparación de precios con competencia.\n`;
-    analysis += `✅ Alertas de precios.\n`;
-    analysis += `✅ Historial de precios.\n`;
-    
-    // Sección 5: FAQ Section
-    analysis += `\n5. FAQ Section:\n`;
-    analysis += `✅ Preguntas frecuentes organizadas por categorías.\n`;
-    analysis += `✅ Sistema de búsqueda en FAQs.\n`;
-    analysis += `✅ Formulario de contacto para consultas específicas.\n`;
-    
-    // Sección 6: Contacto
-    const hasContacto = existingSections.find(s => s.name.toLowerCase().includes('contacto') || s.name.toLowerCase().includes('contact'));
-    analysis += `\n6. Contacto:\n`;
-    if (hasContacto) {
-      analysis += `✅ Formulario de contacto optimizado.\n`;
-      analysis += `✅ Información de ubicación y horarios.\n`;
-      analysis += `✅ Chat en vivo para atención al cliente.\n`;
-    } else {
-      analysis += `❌ Formulario de contacto optimizado.\n`;
-      analysis += `❌ Información de ubicación y horarios.\n`;
-      analysis += `❌ Chat en vivo para atención al cliente.\n`;
-    }
-    
-    return analysis;
-  }
-
-  private generateFinancieroAnalysis(existingSections: SectionAnalysis[], missingSections: SectionAnalysis[]): string {
-    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR FINANCIERO\n\n`;
-    
-    // Sección 1: Inicio (Home)
-    const hasInicio = existingSections.find(s => s.name.toLowerCase().includes('inicio') || s.name.toLowerCase().includes('home'));
-    analysis += `1. Inicio (Home):\n`;
-    if (hasInicio) {
-      analysis += `✅ Cabecera (Header): Contiene el logotipo de la institución y menú de navegación.\n`;
-      analysis += `✅ Información de Servicios: Descripción clara de productos financieros.\n`;
-      analysis += `✅ Testimonios de Confianza: Casos de éxito y testimonios de clientes.\n`;
-      analysis += `✅ Certificaciones de Seguridad: Información sobre regulaciones y seguridad.\n`;
-      analysis += `✅ Footer: Enlaces importantes y información de contacto.\n`;
-    } else {
-      analysis += `❌ Cabecera (Header): Contiene el logotipo de la institución y menú de navegación.\n`;
-      analysis += `❌ Información de Servicios: Descripción clara de productos financieros.\n`;
-      analysis += `❌ Testimonios de Confianza: Casos de éxito y testimonios de clientes.\n`;
-      analysis += `❌ Certificaciones de Seguridad: Información sobre regulaciones y seguridad.\n`;
-      analysis += `❌ Footer: Enlaces importantes y información de contacto.\n`;
-    }
-    
-    // Sección 2: Calculadoras Financieras
-    const hasCalculadora = existingSections.find(s => s.name.toLowerCase().includes('calculadora'));
-    analysis += `\n2. Calculadoras Financieras:\n`;
-    if (hasCalculadora) {
-      analysis += `✅ Herramientas para calcular préstamos, intereses y cuotas.\n`;
-      analysis += `✅ Simuladores de diferentes tipos de crédito.\n`;
-      analysis += `✅ Calculadora de hipotecas.\n`;
-      analysis += `✅ Calculadora de inversiones.\n`;
-    } else {
-      analysis += `❌ Herramientas para calcular préstamos, intereses y cuotas.\n`;
-      analysis += `❌ Simuladores de diferentes tipos de crédito.\n`;
-      analysis += `❌ Calculadora de hipotecas.\n`;
-      analysis += `❌ Calculadora de inversiones.\n`;
-    }
-    
-    // Sección 3: Centro de Ayuda
-    analysis += `\n3. Centro de Ayuda:\n`;
-    analysis += `✅ FAQ organizadas por categorías.\n`;
-    analysis += `✅ Sistema de tickets de soporte.\n`;
-    analysis += `✅ Chat especializado para consultas financieras.\n`;
-    analysis += `✅ Base de conocimientos con artículos informativos.\n`;
-    
-    // Sección 4: Portal de Clientes
-    analysis += `\n4. Portal de Clientes:\n`;
-    analysis += `✅ Dashboard personalizado con resumen de productos.\n`;
-    analysis += `✅ Autenticación de dos factores (2FA).\n`;
-    analysis += `✅ Historial completo de transacciones.\n`;
-    analysis += `✅ Alertas y notificaciones personalizadas.\n`;
-    analysis += `✅ Generación de reportes financieros.\n`;
-    analysis += `✅ Soporte para múltiples monedas.\n`;
-    
-    // Sección 5: Seguridad
-    analysis += `\n5. Seguridad:\n`;
-    analysis += `✅ Información sobre certificaciones de seguridad.\n`;
-    analysis += `✅ Políticas de privacidad y protección de datos.\n`;
-    analysis += `✅ Encriptación de datos y transacciones.\n`;
-    analysis += `✅ Backup de seguridad de información.\n`;
-    
-    // Sección 6: Contacto
-    const hasContacto = existingSections.find(s => s.name.toLowerCase().includes('contacto') || s.name.toLowerCase().includes('contact'));
-    analysis += `\n6. Contacto:\n`;
-    if (hasContacto) {
-      analysis += `✅ Formulario de contacto especializado.\n`;
-      analysis += `✅ Información de sucursales y horarios.\n`;
-      analysis += `✅ Chat en vivo para consultas financieras.\n`;
-    } else {
-      analysis += `❌ Formulario de contacto especializado.\n`;
-      analysis += `❌ Información de sucursales y horarios.\n`;
-      analysis += `❌ Chat en vivo para consultas financieras.\n`;
-    }
-    
-    return analysis;
-  }
-
-  private generateGenericAnalysis(existingSections: SectionAnalysis[], missingSections: SectionAnalysis[], rubro: string): string {
-    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR ${rubro.toUpperCase()}\n\n`;
-    
-    // Sección 1: Inicio (Home)
-    const hasInicio = existingSections.find(s => s.name.toLowerCase().includes('inicio') || s.name.toLowerCase().includes('home'));
-    analysis += `1. Inicio (Home):\n`;
-    if (hasInicio) {
-      analysis += `✅ Cabecera (Header): Contiene el logotipo de la empresa y menú de navegación.\n`;
-      analysis += `✅ Contenido destacado del sector.\n`;
-      analysis += `✅ Formulario de contacto o cotización.\n`;
-      analysis += `✅ Footer con información de contacto y enlaces importantes.\n`;
-    } else {
-      analysis += `❌ Cabecera (Header): Contiene el logotipo de la empresa y menú de navegación.\n`;
-      analysis += `❌ Contenido destacado del sector.\n`;
-      analysis += `❌ Formulario de contacto o cotización.\n`;
-      analysis += `❌ Footer con información de contacto y enlaces importantes.\n`;
-    }
-    
-    // Sección 2: Nosotros
-    const hasNosotros = existingSections.find(s => s.name.toLowerCase().includes('nosotros') || s.name.toLowerCase().includes('about'));
-    analysis += `\n2. Nosotros:\n`;
-    if (hasNosotros) {
-      analysis += `✅ Historia de la empresa, valores y filosofía.\n`;
-      analysis += `✅ Información sobre el equipo y la empresa.\n`;
-      analysis += `✅ Certificaciones y reconocimientos del sector.\n`;
-    } else {
-      analysis += `❌ Historia de la empresa, valores y filosofía.\n`;
-      analysis += `❌ Información sobre el equipo y la empresa.\n`;
-      analysis += `❌ Certificaciones y reconocimientos del sector.\n`;
-    }
-    
-    // Sección 3: Servicios/Productos
-    const hasServicios = existingSections.find(s => s.name.toLowerCase().includes('servicio') || s.name.toLowerCase().includes('producto'));
-    analysis += `\n3. Servicios/Productos:\n`;
-    if (hasServicios) {
-      analysis += `✅ Catálogo o lista de servicios ofrecidos.\n`;
-      analysis += `✅ Descripción detallada de cada servicio.\n`;
-      analysis += `✅ Formularios de cotización o contacto.\n`;
-    } else {
-      analysis += `❌ Catálogo o lista de servicios ofrecidos.\n`;
-      analysis += `❌ Descripción detallada de cada servicio.\n`;
-      analysis += `❌ Formularios de cotización o contacto.\n`;
-    }
-    
-    // Sección 4: Blog/Noticias
-    const hasBlog = existingSections.find(s => s.name.toLowerCase().includes('blog') || s.name.toLowerCase().includes('noticia'));
-    analysis += `\n4. Blog/Noticias:\n`;
-    if (hasBlog) {
-      analysis += `✅ Artículos sobre novedades del sector.\n`;
-      analysis += `✅ Información actualizada sobre la empresa.\n`;
-      analysis += `✅ Contenido educativo relacionado al sector.\n`;
-    } else {
-      analysis += `❌ Artículos sobre novedades del sector.\n`;
-      analysis += `❌ Información actualizada sobre la empresa.\n`;
-      analysis += `❌ Contenido educativo relacionado al sector.\n`;
-    }
-    
-    // Sección 5: Contacto
-    const hasContacto = existingSections.find(s => s.name.toLowerCase().includes('contacto') || s.name.toLowerCase().includes('contact'));
-    analysis += `\n5. Contacto:\n`;
-    if (hasContacto) {
-      analysis += `✅ Formulario de contacto optimizado.\n`;
-      analysis += `✅ Información de ubicación y horarios.\n`;
-      analysis += `✅ Múltiples canales de comunicación.\n`;
-    } else {
-      analysis += `❌ Formulario de contacto optimizado.\n`;
-      analysis += `❌ Información de ubicación y horarios.\n`;
-      analysis += `❌ Múltiples canales de comunicación.\n`;
-    }
-    
-    return analysis;
   }
 
   private generateFallbackAnalysis(request: AIAnalysisRequest): WebsiteStructure {

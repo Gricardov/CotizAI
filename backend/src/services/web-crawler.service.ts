@@ -45,74 +45,75 @@ interface AnalysisResult {
 
 @Injectable()
 export class WebCrawlerService {
-  private readonly EXPECTED_FEATURES: Record<string, Record<string, string[]>> = {
+  private readonly EXPECTED_PAGES: Record<string, Record<string, string[]>> = {
     'Inmobiliario': {
       'Landing': [
-        'Galería de propiedades destacadas',
-        'Mapa de ubicaciones',
-        'Calculadora de préstamos',
-        'Formulario de contacto especializado',
-        'Testimonios de clientes',
-        'Tours virtuales',
-        'Filtros de búsqueda avanzada'
+        'Inicio (Home)',
+        'Nosotros',
+        'Proyectos',
+        'Detalle del Proyecto',
+        'Vende tu Terreno',
+        'Refiere y Gana',
+        'Contacto'
       ],
       'E-Commerce': [
-        'Catálogo de propiedades',
-        'Sistema de reservas online',
-        'Pasarela de pagos',
-        'Panel de usuario',
-        'Sistema de favoritos',
-        'Comparador de propiedades',
-        'Chat en vivo'
+        'Catálogo de Propiedades',
+        'Sistema de Reservas',
+        'Panel de Usuario',
+        'Comparador de Propiedades',
+        'Chat en Vivo',
+        'Sistema de Favoritos'
       ],
       'Aplicación': [
-        'Búsqueda geolocalizada',
-        'Notificaciones push',
-        'Realidad aumentada',
-        'Sincronización offline',
-        'Sistema de mensajería',
-        'Calendario de citas',
-        'Integración con redes sociales'
+        'Búsqueda Geolocalizada',
+        'Notificaciones Push',
+        'Realidad Aumentada',
+        'Sincronización Offline',
+        'Sistema de Mensajería',
+        'Calendario de Citas'
       ]
     },
     'Retail': {
       'E-Commerce': [
-        'Carrito de compras',
-        'Pasarela de pagos múltiple',
-        'Sistema de inventario',
-        'Programa de lealtad',
-        'Recomendaciones personalizadas',
-        'Reviews y ratings',
+        'Catálogo de Productos',
+        'Carrito de Compras',
+        'Pasarela de Pagos',
+        'Sistema de Inventario',
+        'Programa de Lealtad',
+        'Reviews y Ratings',
         'Wishlist'
       ],
       'Landing': [
-        'Catálogo de productos',
-        'Ofertas y promociones',
+        'Inicio (Home)',
+        'Catálogo de Productos',
+        'Ofertas y Promociones',
         'Newsletter',
         'Testimonios',
-        'Galería de productos',
-        'Comparador de precios',
-        'FAQ section'
+        'Comparador de Precios',
+        'FAQ Section',
+        'Contacto'
       ]
     },
     'Financiero': {
       'Landing': [
-        'Calculadoras financieras',
-        'Simuladores de crédito',
-        'Información de servicios',
-        'Testimonios de confianza',
-        'Certificaciones de seguridad',
-        'Centro de ayuda',
-        'Chat especializado'
+        'Inicio (Home)',
+        'Calculadoras Financieras',
+        'Simuladores de Crédito',
+        'Información de Servicios',
+        'Testimonios de Confianza',
+        'Certificaciones de Seguridad',
+        'Centro de Ayuda',
+        'Chat Especializado',
+        'Contacto'
       ],
       'Aplicación': [
-        'Dashboard personalizado',
+        'Dashboard Personalizado',
         'Autenticación 2FA',
-        'Histórial de transacciones',
-        'Alertas y notificaciones',
-        'Reportes financieros',
-        'Soporte multimoneda',
-        'Backup de seguridad'
+        'Historial de Transacciones',
+        'Alertas y Notificaciones',
+        'Reportes Financieros',
+        'Soporte Multimoneda',
+        'Backup de Seguridad'
       ]
     }
   };
@@ -172,8 +173,8 @@ export class WebCrawlerService {
       };
 
       // Características esperadas según el rubro y servicio
-      const expectedFeatures = this.EXPECTED_FEATURES[request.rubro]?.[request.servicio] || [];
-      const missingFeatures = this.findMissingFeatures($, expectedFeatures);
+      const expectedPages = this.EXPECTED_PAGES[request.rubro]?.[request.servicio] || [];
+      const missingPages = this.findMissingPages($, expectedPages);
 
       // Generar recomendaciones
       const recommendations = this.generateRecommendations(
@@ -181,7 +182,7 @@ export class WebCrawlerService {
         designAnalysis, 
         contentAnalysis, 
         technicalAnalysis, 
-        missingFeatures,
+        missingPages,
         request
       );
 
@@ -196,7 +197,7 @@ export class WebCrawlerService {
       // Generar análisis detallado
       const detailedAnalysis = this.generateDetailedAnalysis(
         request,
-        missingFeatures,
+        missingPages,
         recommendations,
         overallScore
       );
@@ -205,7 +206,7 @@ export class WebCrawlerService {
         url: urlToAnalyze,
         title,
         description: metaDescription,
-        missing_features: missingFeatures,
+        missing_features: missingPages,
         recommendations,
         seo_analysis: seoAnalysis,
         design_analysis: designAnalysis,
@@ -330,16 +331,71 @@ export class WebCrawlerService {
     return analyticsServices.some(service => pageContent.includes(service));
   }
 
-  private findMissingFeatures($: cheerio.CheerioAPI, expectedFeatures: string[]): string[] {
+  private findMissingPages($: cheerio.CheerioAPI, expectedPages: string[]): string[] {
     const pageContent = $.html().toLowerCase();
+    const navigationLinks = $('nav a, .nav a, .menu a, header a').map((i, el) => $(el).text().toLowerCase().trim()).get();
     const missing: string[] = [];
     
-    expectedFeatures.forEach((feature: string) => {
-      const keywords = feature.toLowerCase().split(' ');
-      const hasFeature = keywords.some(keyword => pageContent.includes(keyword));
+    // Mapeo de páginas esperadas a palabras clave de búsqueda
+    const pageMappings: Record<string, string[]> = {
+      'Inicio (Home)': ['inicio', 'home', 'principal'],
+      'Nosotros': ['nosotros', 'about', 'sobre', 'empresa'],
+      'Proyectos': ['proyectos', 'projects', 'propiedades', 'properties'],
+      'Detalle del Proyecto': ['detalle', 'proyecto', 'propiedad'],
+      'Vende tu Terreno': ['vende', 'terreno', 'referidos'],
+      'Refiere y Gana': ['refiere', 'gana', 'blog', 'noticias'],
+      'Contacto': ['contacto', 'contact', 'comunícate'],
+      'Catálogo de Propiedades': ['catálogo', 'catalogo', 'propiedades', 'properties'],
+      'Sistema de Reservas': ['reservas', 'reservar', 'booking'],
+      'Panel de Usuario': ['panel', 'usuario', 'mi cuenta', 'dashboard'],
+      'Comparador de Propiedades': ['comparador', 'comparar'],
+      'Chat en Vivo': ['chat', 'vivo', 'ayuda'],
+      'Sistema de Favoritos': ['favoritos', 'guardar', 'wishlist'],
+      'Búsqueda Geolocalizada': ['geolocalizada', 'ubicación', 'mapa'],
+      'Notificaciones Push': ['notificaciones', 'push', 'alertas'],
+      'Realidad Aumentada': ['realidad', 'aumentada', 'ar'],
+      'Sincronización Offline': ['offline', 'sincronización'],
+      'Sistema de Mensajería': ['mensajería', 'mensajes', 'chat'],
+      'Calendario de Citas': ['calendario', 'citas', 'agendar'],
+      'Catálogo de Productos': ['catálogo', 'catalogo', 'productos', 'products'],
+      'Carrito de Compras': ['carrito', 'compras', 'cart'],
+      'Pasarela de Pagos': ['pagos', 'payment', 'checkout'],
+      'Sistema de Inventario': ['inventario', 'stock'],
+      'Programa de Lealtad': ['lealtad', 'puntos', 'recompensas'],
+      'Reviews y Ratings': ['reviews', 'ratings', 'opiniones'],
+      'Wishlist': ['wishlist', 'deseos', 'favoritos'],
+      'Ofertas y Promociones': ['ofertas', 'promociones', 'descuentos'],
+      'Newsletter': ['newsletter', 'suscribirse', 'email'],
+      'Testimonios': ['testimonios', 'opiniones', 'clientes'],
+      'Comparador de Precios': ['comparador', 'precios'],
+      'FAQ Section': ['faq', 'preguntas', 'frecuentes'],
+      'Calculadoras Financieras': ['calculadora', 'calculator', 'financiera'],
+      'Simuladores de Crédito': ['simulador', 'crédito', 'préstamo'],
+      'Información de Servicios': ['servicios', 'services', 'información'],
+      'Testimonios de Confianza': ['testimonios', 'confianza', 'casos'],
+      'Certificaciones de Seguridad': ['certificaciones', 'seguridad', 'ssl'],
+      'Centro de Ayuda': ['ayuda', 'help', 'soporte'],
+      'Chat Especializado': ['chat', 'especializado', 'asesor'],
+      'Dashboard Personalizado': ['dashboard', 'personalizado', 'panel'],
+      'Autenticación 2FA': ['2fa', 'autenticación', 'seguridad'],
+      'Historial de Transacciones': ['historial', 'transacciones', 'movimientos'],
+      'Alertas y Notificaciones': ['alertas', 'notificaciones'],
+      'Reportes Financieros': ['reportes', 'financieros'],
+      'Soporte Multimoneda': ['multimoneda', 'monedas'],
+      'Backup de Seguridad': ['backup', 'respaldo', 'seguridad']
+    };
+    
+    expectedPages.forEach((page: string) => {
+      const keywords = pageMappings[page] || [page.toLowerCase()];
+      const hasPageInNavigation = navigationLinks.some(link => 
+        keywords.some(keyword => link.includes(keyword))
+      );
+      const hasPageInContent = keywords.some(keyword => 
+        pageContent.includes(keyword)
+      );
       
-      if (!hasFeature) {
-        missing.push(feature);
+      if (!hasPageInNavigation && !hasPageInContent) {
+        missing.push(page);
       }
     });
     
@@ -351,7 +407,7 @@ export class WebCrawlerService {
     design: any,
     content: any,
     technical: any,
-    missingFeatures: string[],
+    missingPages: string[],
     request: CrawlAnalysisRequest
   ): string[] {
     const recommendations: string[] = [];
@@ -372,8 +428,8 @@ export class WebCrawlerService {
       recommendations.push('Implementar certificado SSL para mayor seguridad');
     }
     
-    if (missingFeatures.length > 0) {
-      recommendations.push(`Agregar funcionalidades específicas para ${request.rubro}: ${missingFeatures.slice(0, 3).join(', ')}`);
+    if (missingPages.length > 0) {
+      recommendations.push(`Agregar páginas/secciones específicas para ${request.rubro}: ${missingPages.slice(0, 3).join(', ')}`);
     }
     
     return recommendations;
@@ -405,7 +461,7 @@ export class WebCrawlerService {
 
   private generateDetailedAnalysis(
     request: CrawlAnalysisRequest,
-    missingFeatures: string[],
+    missingPages: string[],
     recommendations: string[],
     score: number
   ): string {
@@ -419,9 +475,9 @@ ANÁLISIS ESPECÍFICO PARA ${request.rubro.toUpperCase()} - ${request.servicio.t
 La evaluación de su sitio web actual revela oportunidades significativas de mejora para optimizar su presencia digital en el sector ${request.rubro.toLowerCase()}. 
 
 FUNCIONALIDADES FALTANTES CRÍTICAS:
-${missingFeatures.length > 0 ? 
-  missingFeatures.map(feature => `• ${feature}`).join('\n') : 
-  '• Su sitio web cuenta con las funcionalidades básicas esperadas'}
+${missingPages.length > 0 ? 
+  missingPages.map(page => `• ${page}`).join('\n') : 
+  '• Su sitio web cuenta con las páginas básicas esperadas'}
 
 RECOMENDACIONES PRIORITARIAS:
 ${recommendations.map(rec => `• ${rec}`).join('\n')}
@@ -436,20 +492,20 @@ OPORTUNIDADES DE MEJORA:
 PRÓXIMOS PASOS RECOMENDADOS:
 Una renovación integral del sitio web, enfocada en las necesidades específicas del sector ${request.rubro}, permitirá aprovechar al máximo el potencial digital de su negocio y mejorar significativamente la experiencia de sus usuarios.
 
-La implementación de las funcionalidades faltantes y las mejoras recomendadas posicionará su sitio web como una herramienta competitiva y efectiva para el crecimiento de su negocio.`;
+La implementación de las páginas faltantes y las mejoras recomendadas posicionará su sitio web como una herramienta competitiva y efectiva para el crecimiento de su negocio.`;
   }
 
   private generateFallbackAnalysis(request: CrawlAnalysisRequest): AnalysisResult {
-    const expectedFeatures = this.EXPECTED_FEATURES[request.rubro]?.[request.servicio] || [];
+    const expectedPages = this.EXPECTED_PAGES[request.rubro]?.[request.servicio] || [];
     
     return {
       url: request.url,
       title: 'Análisis no disponible',
       description: 'No se pudo acceder al sitio web para realizar el análisis',
-      missing_features: expectedFeatures,
+      missing_features: expectedPages,
       recommendations: [
         'Verificar que el sitio web esté accesible',
-        'Implementar funcionalidades específicas del sector',
+        'Implementar páginas específicas del sector',
         'Mejorar la estructura y navegación del sitio',
         'Optimizar para dispositivos móviles',
         'Agregar elementos de confianza y credibilidad'
@@ -491,7 +547,7 @@ RECOMENDACIONES GENERALES PARA ${request.rubro.toUpperCase()} - ${request.servic
 Basándose en las mejores prácticas para el sector ${request.rubro.toLowerCase()}, se recomienda implementar:
 
 FUNCIONALIDADES ESENCIALES:
-${expectedFeatures.map(feature => `• ${feature}`).join('\n')}
+${expectedPages.map(page => `• ${page}`).join('\n')}
 
 ASPECTOS TÉCNICOS FUNDAMENTALES:
 • Certificado SSL para seguridad

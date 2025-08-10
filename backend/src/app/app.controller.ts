@@ -155,16 +155,50 @@ Esta renovación completa posicionará el sitio web como una herramienta competi
       
       return {
         success: true,
-        tiempoAnalizado: tiempoAnalizado,
+        tiempoAnalizado,
         timestamp: new Date().toISOString()
       };
     } catch (error) {
       console.error('Error analizando tiempo de desarrollo:', error);
       
+      // Usar fallback si falla la IA
+      const tiempoAnalizado = this.aiTimeAnalyzerService.generateFallbackTimeAnalysis(body.tiempoDesarrollo);
+      
       return {
-        success: false,
-        error: 'No se pudo analizar el tiempo de desarrollo',
-        tiempoAnalizado: this.aiTimeAnalyzerService.generateFallbackTimeAnalysis(body.tiempoDesarrollo),
+        success: true,
+        tiempoAnalizado,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  @Post('mejorar-requerimientos')
+  async mejorarRequerimientos(@Body() body: { requerimientos: string; rubro: string; servicio: string }) {
+    try {
+      const requerimientosMejorados = await this.aiTimeAnalyzerService.mejorarRequerimientosTecnicos(
+        body.requerimientos,
+        body.rubro,
+        body.servicio
+      );
+      
+      return {
+        success: true,
+        requerimientosMejorados,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error mejorando requerimientos:', error);
+      
+      // Usar fallback si falla la IA
+      const requerimientosMejorados = this.aiTimeAnalyzerService.generateFallbackRequerimientosMejorados(
+        body.requerimientos,
+        body.rubro,
+        body.servicio
+      );
+      
+      return {
+        success: true,
+        requerimientosMejorados,
         timestamp: new Date().toISOString()
       };
     }
