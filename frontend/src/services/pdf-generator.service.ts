@@ -136,7 +136,7 @@ export class PDFGeneratorService {
         bold: true,
         margin: [0, 0, 0, 15] as [number, number, number, number],
         lineHeight: 1.4,
-        color: '#667eea'
+        color: '#ae1781'
       },
       normal: {
         fontSize: 12,
@@ -161,13 +161,13 @@ export class PDFGeneratorService {
         bold: true,
         margin: [0, 20, 0, 10] as [number, number, number, number],
         lineHeight: 1.4,
-        color: '#667eea'
+        color: '#ae1781'
       },
       tableHeader: {
         bold: true,
         fontSize: 10,
         color: 'white',
-        fillColor: '#667eea',
+        fillColor: '#ae1781',
         lineHeight: 1.2
       },
       tableRow: {
@@ -209,17 +209,20 @@ export class PDFGeneratorService {
     // Construir contenido del documento
     const content: any[] = [];
 
-    // Línea lila al inicio (solo primera página)
+    // Barra superior del header con el color solicitado
     content.push({
       canvas: [
         {
-          type: 'line' as const,
-          x1: 0, y1: 0, x2: 515, y2: 0,
+          type: 'line',
+          x1: 0,
+          y1: 0,
+          x2: 515,
+          y2: 0,
           lineWidth: 2,
-          lineColor: '#663399'
+          lineColor: '#ae1781',
         }
       ],
-      margin: [0, 0, 0, 20] as [number, number, number, number]
+      margin: [0, 0, 0, 20]
     });
 
     // Logo en la esquina superior derecha (solo si existe)
@@ -289,7 +292,7 @@ export class PDFGeneratorService {
       data.caracteristicas.forEach((caracteristica, index) => {
         content.push({
           text: [
-            { text: `${index + 1}. `, bold: true, color: '#667eea' },
+            { text: `${index + 1}. `, bold: true, color: '#ae1781' },
             { text: this.cleanAsterisks(caracteristica.contenido), color: '#495057' }
           ],
           style: 'normal'
@@ -485,20 +488,6 @@ export class PDFGeneratorService {
       console.warn('Firma no encontrada, continuando sin firma');
     }
     
-    // Línea delgada debajo de la imagen de firma (como contrato)
-    content.push({
-      canvas: [
-        {
-          type: 'line' as const,
-          x1: 0, y1: 0, x2: 100, y2: 0, // Línea corta centrada
-          lineWidth: 1,
-          lineColor: '#000000'
-        }
-      ],
-      alignment: 'center',
-      margin: [0, 0, 0, 15] as [number, number, number, number]
-    });
-    
     // Información de la firma
     content.push({ 
       text: 'Juan Jesús Astete Meza', 
@@ -511,30 +500,29 @@ export class PDFGeneratorService {
       text: 'Cargo: CTO', 
       style: 'normal', 
       alignment: 'center',
-      margin: [0, 0, 0, 20] as [number, number, number, number]
+      margin: [0, 0, 0, 40] as [number, number, number, number]
+    });
+
+    // Línea final perfectamente alineada al final
+    content.push({
+      canvas: [
+        {
+          type: 'line',
+          x1: 0,
+          y1: 0,
+          x2: 515,
+          y2: 0,
+          lineWidth: 2,
+          lineColor: '#ae1781',
+        }
+      ],
+      margin: [0, 0, 0, 0] // Sin márgenes para que esté pegado al final
     });
 
     // Definir documento
     const docDefinition = {
       pageSize: 'A4' as const,
       pageMargins: [40, 60, 40, 60] as [number, number, number, number],
-      footer: function(currentPage: number, pageCount: number) {
-        // Solo mostrar la línea lila en la última página
-        if (currentPage === pageCount) {
-          return {
-            canvas: [
-              {
-                type: 'line' as const,
-                x1: 0, y1: 0, x2: 515, y2: 0,
-                lineWidth: 2,
-                lineColor: '#663399'
-              }
-            ],
-            margin: [40, 0, 40, 20] as [number, number, number, number]
-          };
-        }
-        return null; // No mostrar nada en otras páginas
-      } as any,
       content: content,
       styles: styles,
       defaultStyle: {

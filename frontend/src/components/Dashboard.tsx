@@ -4,47 +4,90 @@ import {
   Drawer,
   AppBar,
   Toolbar,
-  List,
   Typography,
-  Divider,
   IconButton,
+  List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
-  Button,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
+  Assessment as AssessmentIcon,
+  Settings as SettingsIcon,
+  ExitToApp as LogoutIcon,
+  Person as PersonIcon,
+  Business as BusinessIcon,
   ChevronLeft as ChevronLeftIcon,
-  RequestQuote as RequestQuoteIcon,
-  Logout as LogoutIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { CotizadorForm } from './CotizadorForm';
+import { GestionOperaciones } from './GestionOperaciones';
 
 const drawerWidth = 240;
+const collapsedDrawerWidth = 64;
 
 export const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
-  const [open, setOpen] = useState(true);
-  const [activeSection, setActiveSection] = useState('cotizar');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedOption, setSelectedOption] = useState('cotizar');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [cotizacionToLoad, setCotizacionToLoad] = useState<any>(null);
 
-  const toggleDrawer = () => {
-    setOpen(!open);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
   };
 
   const handleLogout = () => {
     logout();
+    handleMenuClose();
   };
 
+  const handleLoadCotizacion = (cotizacionData: any) => {
+    // Cambiar a la vista de cotización y cargar los datos
+    setSelectedOption('cotizar');
+    // Pasar los datos directamente al componente
+    setCotizacionToLoad(cotizacionData);
+  };
+
+  const handleCotizacionLoaded = () => {
+    // Limpiar los datos después de que se hayan cargado
+    setCotizacionToLoad(null);
+  };
+
+  const menuItems = [
+    {
+      text: 'Cotizar',
+      icon: <AssessmentIcon />,
+      value: 'cotizar',
+      roles: ['cotizador', 'admin']
+    },
+    {
+      text: 'Gestión',
+      icon: <BusinessIcon />,
+      value: 'gestion',
+      roles: ['cotizador', 'admin']
+    }
+  ];
+
   const renderContent = () => {
-    switch (activeSection) {
+    switch (selectedOption) {
       case 'cotizar':
-        return <CotizadorForm />;
+        return <CotizadorForm cotizacionToLoad={cotizacionToLoad} onCotizacionLoaded={handleCotizacionLoaded} />;
+      case 'gestion':
+        return <GestionOperaciones onLoadCotizacion={handleLoadCotizacion} />;
       default:
-        return <CotizadorForm />;
+        return <CotizadorForm cotizacionToLoad={cotizacionToLoad} onCotizacionLoaded={handleCotizacionLoaded} />;
     }
   };
 
@@ -53,94 +96,125 @@ export const Dashboard: React.FC = () => {
       <AppBar
         position="fixed"
         sx={{
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          width: { sm: `calc(100% - ${sidebarOpen ? drawerWidth : collapsedDrawerWidth}px)` },
+          ml: { sm: `${sidebarOpen ? drawerWidth : collapsedDrawerWidth}px` },
+          backgroundColor: '#667eea',
+          transition: 'width 0.3s ease, margin-left 0.3s ease',
         }}
+        elevation={3}
       >
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer}
             edge="start"
-            sx={{ mr: 2 }}
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            sx={{ mr: 2, display: { sm: 'none' } }}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            CotizAI - Dashboard
+            CotizAI - Sistema de Cotización
           </Typography>
-          <Typography variant="body2" sx={{ mr: 2 }}>
-            {user?.username} ({user?.area})
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-            sx={{ textTransform: 'none' }}
-          >
-            Salir
-          </Button>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+              {user?.nombre}
+            </Typography>
+            <IconButton
+              color="inherit"
+              onClick={handleMenuOpen}
+              sx={{ p: 0 }}
+            >
+              <Avatar sx={{ width: 32, height: 32, bgcolor: 'rgba(255,255,255,0.2)' }}>
+                <PersonIcon />
+              </Avatar>
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
 
       <Drawer
-        variant="persistent"
-        anchor="left"
-        open={open}
+        variant="permanent"
         sx={{
-          width: open ? drawerWidth : 0,
+          width: sidebarOpen ? drawerWidth : collapsedDrawerWidth,
           flexShrink: 0,
-          transition: 'width 0.3s',
+          transition: 'width 0.3s ease',
           '& .MuiDrawer-paper': {
-            width: drawerWidth,
+            width: sidebarOpen ? drawerWidth : collapsedDrawerWidth,
             boxSizing: 'border-box',
-            background: 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)',
-            borderRight: '1px solid #dee2e6',
+            backgroundColor: '#667eea',
+            borderRight: '1px solid #5a6fd8',
+            transition: 'width 0.3s ease',
+            boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+            overflowX: 'hidden',
           },
         }}
       >
-        <Toolbar>
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Typography variant="h6" sx={{ flexGrow: 1, color: '#495057' }}>
-              Menú
-            </Typography>
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-        <Divider />
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton
-              selected={activeSection === 'cotizar'}
-              onClick={() => setActiveSection('cotizar')}
+        <Box sx={{ overflow: 'auto', pt: 8 }}>
+          {/* Botón para expandir/ocultar sidebar - arriba */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 1, mb: 1 }}>
+            <IconButton
+              onClick={() => setSidebarOpen(!sidebarOpen)}
               sx={{
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                  borderRight: '3px solid #667eea',
-                },
+                color: 'white',
+                backgroundColor: 'rgba(255,255,255,0.1)',
                 '&:hover': {
-                  backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
                 },
               }}
             >
-              <ListItemIcon>
-                <RequestQuoteIcon sx={{ color: '#667eea' }} />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Cotizar" 
-                sx={{ 
-                  '& .MuiListItemText-primary': { 
-                    color: '#495057',
-                    fontWeight: activeSection === 'cotizar' ? 'bold' : 'normal',
-                  }
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+              {sidebarOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            </IconButton>
+          </Box>
+          
+          <List>
+            {menuItems.map((item) => (
+              <ListItem key={item.value} disablePadding>
+                <ListItemButton
+                  onClick={() => setSelectedOption(item.value)}
+                  selected={selectedOption === item.value}
+                  sx={{
+                    mx: 1,
+                    borderRadius: 1,
+                    minHeight: 48,
+                    '&.Mui-selected': {
+                      backgroundColor: 'white',
+                      color: '#667eea',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                      },
+                      '& .MuiListItemIcon-root': {
+                        color: '#667eea',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      color: 'white',
+                    },
+                    color: 'rgba(255,255,255,0.8)',
+                  }}
+                >
+                  <ListItemIcon sx={{ 
+                    color: selectedOption === item.value ? '#667eea' : 'rgba(255,255,255,0.8)',
+                    minWidth: 40,
+                  }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  {sidebarOpen && (
+                    <ListItemText 
+                      primary={item.text} 
+                      sx={{
+                        '& .MuiTypography-root': {
+                          fontWeight: selectedOption === item.value ? 600 : 400,
+                        }
+                      }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       </Drawer>
 
       <Box
@@ -148,15 +222,34 @@ export const Dashboard: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          marginLeft: open ? 0 : `-${drawerWidth}px`,
-          transition: 'margin-left 0.3s',
-          backgroundColor: '#f8f9fa',
+          width: { sm: `calc(100% - ${sidebarOpen ? drawerWidth : collapsedDrawerWidth}px)` },
+          backgroundColor: '#f5f5f5',
           minHeight: '100vh',
+          transition: 'width 0.3s ease',
         }}
       >
         <Toolbar />
         {renderContent()}
       </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            minWidth: 150,
+          },
+        }}
+      >
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon fontSize="small" />
+          </ListItemIcon>
+          Cerrar Sesión
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }; 

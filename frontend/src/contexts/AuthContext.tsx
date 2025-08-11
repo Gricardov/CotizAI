@@ -3,8 +3,9 @@ import axios from 'axios';
 
 interface User {
   id: number;
+  nombre: string;
   username: string;
-  role: string;
+  rol: 'cotizador' | 'admin';
   area: string;
 }
 
@@ -12,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   login: (username: string, password: string, area: string) => Promise<boolean>;
   logout: () => void;
+  isAuthenticated: boolean;
   loading: boolean;
 }
 
@@ -36,7 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       validateToken();
     } else {
       setLoading(false);
@@ -45,9 +46,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const validateToken = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/auth/validate');
-      setUser(response.data.user);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const response = await axios.get('http://localhost:3000/auth/validate');
+      
+      if (response.data.valid) {
+        setUser(response.data.user);
+      } else {
+        localStorage.removeItem('token');
+        delete axios.defaults.headers.common['Authorization'];
+      }
     } catch (error) {
+      console.error('Error validating token:', error);
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['Authorization'];
     } finally {
@@ -57,19 +72,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string, area: string): Promise<boolean> => {
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', {
+      const response = await axios.post('http://localhost:3000/auth/login', {
         username,
         password,
-        area,
+        area
       });
 
-      const { access_token, user: userData } = response.data;
+      const { access_token, user } = response.data;
+      
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      setUser(userData);
+      
+      setUser(user);
       return true;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
       return false;
     }
   };
@@ -80,12 +97,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     login,
     logout,
-    loading,
+    isAuthenticated: !!user,
+    loading
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }; 

@@ -1,68 +1,67 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-
-export interface LoginDto {
-  username: string;
-  password: string;
-  area: string;
-}
-
-export interface User {
-  id: number;
-  username: string;
-  role: string;
-  area: string;
-}
+import { UserService } from '../services/user.service';
+import { User, UserRole } from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  async validateUser(username: string, password: string, area: string): Promise<User | null> {
-    // Por ahora, usuario hardcodeado
-    if (username === 'admin' && password === '12345') {
-      return {
-        id: 1,
-        username: 'admin',
-        role: 'cotizador',
-        area: area,
-      };
+  async validateUser(username: string, password: string): Promise<any> {
+    const user = await this.userService.validateUser(username, password);
+    if (user) {
+      const { password, ...result } = user;
+      return result;
     }
     return null;
   }
 
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.username, loginDto.password, loginDto.area);
-    
-    if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
+  async login(user: any, selectedArea?: string) {
     const payload = { 
       username: user.username, 
       sub: user.id, 
-      role: user.role,
-      area: user.area 
+      rol: user.rol,
+      area: selectedArea || user.area 
     };
-
+    
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
+        nombre: user.nombre,
         username: user.username,
-        role: user.role,
-        area: user.area,
-      },
+        rol: user.rol,
+        area: selectedArea || user.area
+      }
     };
   }
 
-  async validateToken(payload: any): Promise<User> {
-    return {
-      id: payload.sub,
-      username: payload.username,
-      role: payload.role,
-      area: payload.area,
-    };
+  async register(userData: {
+    nombre: string;
+    username: string;
+    password: string;
+    rol: UserRole;
+    area: string;
+  }) {
+    const existingUser = await this.userService.findByUsername(userData.username);
+    if (existingUser) {
+      throw new Error('El usuario ya existe');
+    }
+
+    const user = await this.userService.createUser(userData);
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async getProfile(userId: number) {
+    const user = await this.userService.getUserById(userId);
+    if (user) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
   }
 } 

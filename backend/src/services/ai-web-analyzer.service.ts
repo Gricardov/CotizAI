@@ -414,8 +414,6 @@ ${allSections.map(section => `- ${section.name}: ${section.description} (${secti
 
 Genera un análisis estructurado en el siguiente formato exacto:
 
-ANÁLISIS DE ESTRUCTURA WEB - SECTOR ${request.rubro.toUpperCase()}
-
 1. [Nombre de la sección]:
 [Descripción de lo que contiene o debería contener la sección]
 [Otra característica de la sección]
@@ -469,34 +467,6 @@ Genera solo el análisis estructurado, sin introducciones ni conclusiones adicio
       // Si falla la API, devolver error 500
       throw new Error('Error interno del servidor al analizar la página web');
     }
-  }
-
-  private generateFallbackAnalysisText(
-    request: AIAnalysisRequest,
-    existingSections: SectionAnalysis[],
-    missingSections: SectionAnalysis[]
-  ): string {
-    let analysis = `ANÁLISIS DE ESTRUCTURA WEB - SECTOR ${request.rubro.toUpperCase()}\n\n`;
-    
-    // Agregar secciones encontradas
-    if (existingSections.length > 0) {
-      analysis += `SECCIONES ENCONTRADAS:\n`;
-      existingSections.forEach((section, index) => {
-        analysis += `${index + 1}. ${section.name}:\n`;
-        analysis += `${section.description}\n\n`;
-      });
-    }
-    
-    // Agregar secciones faltantes
-    if (missingSections.length > 0) {
-      analysis += `SECCIONES FALTANTES:\n`;
-      missingSections.forEach((section, index) => {
-        analysis += `${index + 1}. ${section.name}:\n`;
-        analysis += `${section.description}\n\n`;
-      });
-    }
-    
-    return analysis;
   }
 
   private async detectExistingSections($: cheerio.CheerioAPI, request: AIAnalysisRequest): Promise<SectionAnalysis[]> {

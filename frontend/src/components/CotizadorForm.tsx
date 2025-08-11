@@ -33,6 +33,7 @@ import {
   Analytics as AnalyticsIcon,
   SmartToy as RobotIcon,
   PictureAsPdf as PdfIcon,
+  Save as SaveIcon,
 } from '@mui/icons-material';
 import {
   DndContext,
@@ -518,7 +519,12 @@ const RobotMejorandoRequerimientos: React.FC = () => {
   );
 };
 
-export const CotizadorForm: React.FC = () => {
+interface CotizadorFormProps {
+  cotizacionToLoad?: any;
+  onCotizacionLoaded?: () => void;
+}
+
+export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, onCotizacionLoaded }) => {
   const [formData, setFormData] = useState({
     fecha: '',
     nombreEmpresa: '',
@@ -550,8 +556,11 @@ export const CotizadorForm: React.FC = () => {
   const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>([]);
 
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
   const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -559,6 +568,65 @@ export const CotizadorForm: React.FC = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Cargar datos de cotización cuando se reciben las props
+  useEffect(() => {
+    if (cotizacionToLoad) {
+      try {
+        // Cargar datos del formulario
+        setFormData(prev => ({
+          ...prev,
+          fecha: cotizacionToLoad.fecha || '',
+          nombreEmpresa: cotizacionToLoad.nombreEmpresa || '',
+          nombreProyecto: cotizacionToLoad.nombreProyecto || '',
+          nombreContacto: cotizacionToLoad.nombreContacto || '',
+          correoContacto: cotizacionToLoad.correoContacto || '',
+          rubro: cotizacionToLoad.rubro || '',
+          servicio: cotizacionToLoad.servicio || '',
+          tipo: cotizacionToLoad.tipo || '',
+          promptsRequerimientos: cotizacionToLoad.promptsRequerimientos || '',
+          requerimientosMejorados: cotizacionToLoad.requerimientosMejorados || '',
+          servicioNecesidad: cotizacionToLoad.servicioNecesidad || '',
+          descripcionProyecto: cotizacionToLoad.descripcionProyecto || '',
+          urlAnalisis: cotizacionToLoad.urlAnalisis || '',
+          detallePagina: cotizacionToLoad.detallePagina || '',
+          duracionProyecto: cotizacionToLoad.duracionProyecto || prev.duracionProyecto,
+          crmSeleccionado: cotizacionToLoad.crmSeleccionado || '',
+          crmOtro: cotizacionToLoad.crmOtro || '',
+        }));
+
+        // Cargar características
+        if (cotizacionToLoad.caracteristicas && Array.isArray(cotizacionToLoad.caracteristicas)) {
+          setCaracteristicas(cotizacionToLoad.caracteristicas);
+        }
+
+        // Cargar items de propuesta
+        if (cotizacionToLoad.itemsPropuesta && Array.isArray(cotizacionToLoad.itemsPropuesta)) {
+          setItemsPropuesta(cotizacionToLoad.itemsPropuesta);
+        }
+
+        // Cargar servicios adicionales
+        if (cotizacionToLoad.serviciosAdicionales && Array.isArray(cotizacionToLoad.serviciosAdicionales)) {
+          setServiciosAdicionales(cotizacionToLoad.serviciosAdicionales);
+        }
+        
+        // Mostrar mensaje de éxito
+        setSuccessMessage('¡Cotización cargada exitosamente desde la base de datos!');
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          setSuccessMessage('');
+        }, 3000);
+
+        // Notificar que se han cargado los datos
+        if (onCotizacionLoaded) {
+          onCotizacionLoaded();
+        }
+      } catch (error) {
+        console.error('Error al cargar cotización:', error);
+      }
+    }
+  }, [cotizacionToLoad, onCotizacionLoaded]);
 
   // Función para calcular valores de items de propuesta
   const calcularItemPropuesta = (monto: number | string, descuento: number | string): Partial<ItemPropuesta> => {
@@ -726,7 +794,7 @@ export const CotizadorForm: React.FC = () => {
     setAnalizandoWeb(true);
     
     try {
-      const response = await axios.post('http://localhost:3000/api/analizar-estructura-web', {
+      const response = await axios.post('http://localhost:3000/analizar-estructura-web', {
         url: formData.urlAnalisis,
         rubro: formData.rubro,
         servicio: formData.servicio,
@@ -815,7 +883,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
   const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/generar-descripcion-proyecto', {
+      const response = await axios.post('http://localhost:3000/generar-descripcion-proyecto', {
         rubro,
         servicio
       });
@@ -839,7 +907,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
     setMejorandoRequerimientos(true);
     try {
-      const response = await axios.post('http://localhost:3000/api/mejorar-requerimientos', {
+      const response = await axios.post('http://localhost:3000/mejorar-requerimientos', {
         requerimientos: formData.promptsRequerimientos,
         rubro: formData.rubro,
         servicio: formData.servicio
@@ -912,11 +980,64 @@ Por favor, verifique la URL e intente nuevamente.`
       await PDFGeneratorService.generateCotizacionPDF(cotizacionData);
       
       console.log('Datos del formulario:', cotizacionData);
+      setSuccessMessage('¡Cotización PDF generada y descargada exitosamente!');
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => {
+        setSuccess(false);
+        setSuccessMessage('');
+      }, 3000);
     } catch (error) {
       console.error('Error generando PDF:', error);
       alert('Error al generar el PDF. Por favor, intente nuevamente.');
+    }
+  };
+
+  const handleGuardar = async () => {
+    setGuardando(true);
+    setGuardadoExitoso(false);
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No hay token de autenticación');
+      }
+
+      const nombreCotizacion = formData.nombreEmpresa 
+        ? `Cotización - ${formData.nombreEmpresa}`
+        : 'Cotización sin nombre';
+
+      const cotizacionData = {
+        nombre: nombreCotizacion,
+        data: {
+          ...formData,
+          caracteristicas: caracteristicas,
+          itemsPropuesta: itemsPropuesta,
+          serviciosAdicionales: serviciosAdicionales,
+          requerimientosMejorados: formData.requerimientosMejorados,
+          fechaCreacion: new Date().toISOString()
+        }
+      };
+
+      const response = await axios.post(
+        'http://localhost:3000/auth/guardar-cotizacion',
+        cotizacionData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 201) {
+        setGuardadoExitoso(true);
+        setTimeout(() => setGuardadoExitoso(false), 3000);
+      }
+    } catch (error) {
+      console.error('Error al guardar la cotización:', error);
+      alert('Error al guardar la cotización. Inténtalo de nuevo.');
+    } finally {
+      setGuardando(false);
     }
   };
 
@@ -1043,6 +1164,45 @@ Por favor, verifique la URL e intente nuevamente.`
                 onChange={handleChange('nombreProyecto')}
                 sx={{
                   flex: '1 1 200px',
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              <TextField
+                label="Nombre del contacto"
+                variant="outlined"
+                value={formData.nombreContacto}
+                onChange={handleChange('nombreContacto')}
+                sx={{
+                  flex: '1 1 250px',
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+
+              <TextField
+                label="Correo de contacto"
+                variant="outlined"
+                type="email"
+                value={formData.correoContacto}
+                onChange={handleChange('correoContacto')}
+                sx={{
+                  flex: '1 1 250px',
                   '& .MuiOutlinedInput-root': {
                     '&:hover fieldset': {
                       borderColor: '#667eea',
@@ -1222,45 +1382,6 @@ Por favor, verifique la URL e intente nuevamente.`
                 )}
               </Box>
             )}
-
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <TextField
-                label="Nombre del contacto"
-                variant="outlined"
-                value={formData.nombreContacto}
-                onChange={handleChange('nombreContacto')}
-                sx={{
-                  flex: '1 1 250px',
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-
-              <TextField
-                label="Correo de contacto"
-                variant="outlined"
-                type="email"
-                value={formData.correoContacto}
-                onChange={handleChange('correoContacto')}
-                sx={{
-                  flex: '1 1 250px',
-                  '& .MuiOutlinedInput-root': {
-                    '&:hover fieldset': {
-                      borderColor: '#667eea',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#667eea',
-                    },
-                  },
-                }}
-              />
-            </Box>
 
             {/* Texto fijo */}
             <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
@@ -2066,11 +2187,39 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {success && (
               <Alert severity="success" sx={{ mb: 2 }}>
-                ¡Cotización PDF generada y descargada exitosamente!
+                {successMessage}
+              </Alert>
+            )}
+
+            {guardadoExitoso && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                ¡Cotización guardada exitosamente en la base de datos!
               </Alert>
             )}
             
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<SaveIcon />}
+                onClick={handleGuardar}
+                disabled={guardando}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #28a745 0%, #20c997 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #218838 0%, #1ea085 100%)',
+                  },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                }}
+              >
+                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
+              </Button>
+              
               <Button
                 type="submit"
                 variant="contained"

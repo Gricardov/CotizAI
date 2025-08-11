@@ -37,11 +37,12 @@ const AppContent = () => {
     );
   }
 
-  // Verificar si el usuario tiene el rol de cotizador
-  if (user && user.role === 'cotizador') {
+  // Si el usuario está autenticado (cotizador o admin), mostrar Dashboard
+  if (user) {
     return <Dashboard />;
   }
 
+  // Si no está autenticado, mostrar Login
   return <Login />;
 };
 
