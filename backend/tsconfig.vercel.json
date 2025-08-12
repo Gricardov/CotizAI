@@ -24,7 +24,13 @@
     "noEmitOnError": false,
     "types": ["node"],
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noErrorTruncation": false,
+    "preserveConstEnums": false,
+    "isolatedModules": false
   },
   "include": [
     "src/**/*"
