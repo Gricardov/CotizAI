@@ -1,154 +1,142 @@
-# 🚀 CotizAI - Sistema de Cotización Inteligente
+# CotizAI - Sistema de Cotizaciones
 
-## 📋 Descripción
+Sistema completo de cotizaciones con frontend React y backend NestJS.
 
-CotizAI es una aplicación web moderna para generar cotizaciones profesionales utilizando inteligencia artificial. El sistema incluye un frontend en React con Material-UI y un backend en NestJS con integración de IA.
+## 🚀 Scripts de Desarrollo
 
-## 🏗️ Arquitectura
-
-- **Frontend**: React + TypeScript + Material-UI
-- **Backend**: NestJS + TypeScript + PostgreSQL
-- **IA**: OpenAI GPT + Google Gemini
-- **Autenticación**: JWT
-- **Despliegue**: Vercel (configurado)
-
-## 🚀 Características
-
-### ✨ Funcionalidades Principales
-- **Autenticación**: Login con roles (admin/cotizador)
-- **Cotizador**: Formulario inteligente con IA
-- **Gestión de Operaciones**: CRUD de cotizaciones
-- **Análisis Web**: Crawler automático de sitios web
-- **Generación de PDF**: Cotizaciones profesionales
-- **IA Integrada**: Descripción de proyectos y análisis
-
-### 🎯 Roles de Usuario
-- **Admin**: Acceso completo (crear, editar, eliminar)
-- **Cotizador**: Solo lectura y creación de cotizaciones
-
-## 🛠️ Instalación
-
-### Prerrequisitos
-- Node.js 18+
-- PostgreSQL
-- npm o yarn
-
-### 1. Clonar el repositorio
+### **Ejecutar Ambos Servidores (Frontend + Backend)**
 ```bash
-git clone <repository-url>
-cd cotizai-app
+# Opción 1: Usando concurrently (recomendado)
+npm run both
+
+# Opción 2: Usando dev
+npm run dev:both
+
+# Opción 3: Usando start
+npm run start:both
 ```
 
-### 2. Instalar dependencias
+### **Ejecutar Servidores Independientemente**
+
+#### **Solo Frontend (React)**
 ```bash
-npm install
-```
-
-### 3. Configurar base de datos
-```bash
-# Crear base de datos PostgreSQL
-createdb cotizai
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus credenciales
-```
-
-### 4. Ejecutar migraciones
-```bash
-cd backend
-npm run migration:run
-```
-
-### 5. Iniciar desarrollo
-```bash
-# Terminal 1 - Backend
-npm run backend
-
-# Terminal 2 - Frontend
+# Opción 1: Desde la raíz del proyecto
 npm run frontend
 
-# O ambos juntos
+# Opción 2: Navegar a la carpeta frontend y ejecutar
+cd frontend
 npm run dev
+
+# Opción 3: Comando directo desde la raíz
+npm run frontend:dev
 ```
 
-## 🌐 URLs de Desarrollo
+#### **Solo Backend (NestJS)**
+```bash
+# Opción 1: Desde la raíz del proyecto
+npm run backend
 
-- **Frontend**: http://localhost:4200
-- **Backend**: http://localhost:3000
-- **API**: http://localhost:3000/api
+# Opción 2: Navegar a la carpeta backend y ejecutar
+cd backend
+npm run dev
 
-## 🚀 Despliegue en Vercel
+# Opción 3: Comando directo desde la raíz
+npm run backend:dev
+```
 
-### Configuración Automática
-El proyecto está configurado para desplegar automáticamente en Vercel:
+## 📋 Comandos Disponibles
 
-1. **Variables de entorno en Vercel:**
-   ```
-   DATABASE_HOST=your-db-host
-   DATABASE_PORT=5432
-   DATABASE_USERNAME=your-username
-   DATABASE_PASSWORD=your-password
-   DATABASE_NAME=your-db-name
-   JWT_SECRET=your-jwt-secret
-   OPENAI_API_KEY=your-openai-key
-   GOOGLE_AI_API_KEY=your-google-ai-key
-   ```
+### **Desde la Raíz del Proyecto**
+| Comando | Descripción | Puertos |
+|---------|-------------|---------|
+| `npm run both` | Ejecuta frontend y backend juntos | Frontend: 4200, Backend: 3000 |
+| `npm run frontend` | Solo frontend | 4200 |
+| `npm run backend` | Solo backend | 3000 |
+| `npm run dev:both` | Modo desarrollo ambos | Por defecto |
+| `npm run dev:frontend` | Solo frontend desarrollo | Por defecto |
+| `npm run dev:backend` | Solo backend desarrollo | Por defecto |
 
-2. **Desplegar:**
-   ```bash
-   npm i -g vercel
-   vercel login
-   vercel
-   ```
+### **Navegación a Carpetas**
+| Comando | Descripción |
+|---------|-------------|
+| `npm run cd:frontend` | Navegar a la carpeta frontend |
+| `npm run cd:backend` | Navegar a la carpeta backend |
 
-### URLs de Producción
-- **Frontend**: https://tu-proyecto.vercel.app
-- **API**: https://tu-proyecto.vercel.app/api
+### **Ejecutar desde Carpetas Individuales**
+| Comando | Descripción |
+|---------|-------------|
+| `npm run frontend:dev` | Ejecutar frontend desde su carpeta |
+| `npm run backend:dev` | Ejecutar backend desde su carpeta |
+| `npm run frontend:start` | Iniciar frontend desde su carpeta |
+| `npm run backend:start` | Iniciar backend desde su carpeta |
+| `npm run frontend:serve` | Servir frontend desde su carpeta |
+| `npm run backend:serve` | Servir backend desde su carpeta |
+
+## 🔧 Configuración
+
+### **Variables de Entorno**
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+# Base de datos
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=tu_usuario
+DATABASE_PASSWORD=tu_password
+DATABASE_NAME=cotizai_db
+
+# JWT
+JWT_SECRET=tu_jwt_secret_super_seguro
+JWT_EXPIRES_IN=24h
+
+# APIs
+OPENAI_API_KEY=tu_openai_api_key
+GOOGLE_AI_API_KEY=tu_google_ai_api_key
+
+# Entorno
+NODE_ENV=development
+PORT=3000
+REACT_APP_API_URL=http://localhost:3000
+```
+
+### **Credenciales de Acceso**
+- **Usuario Admin:** `admin` / `12345`
+- **Usuario Cotizador:** `cotizador` / `12345`
+
+## 🏗️ Build y Despliegue
+
+### **Build para Producción**
+```bash
+npm run build
+```
+
+### **Build para Vercel**
+```bash
+npm run vercel-build
+```
 
 ## 📁 Estructura del Proyecto
 
 ```
 cotizai-app/
-├── frontend/                 # React App
-│   ├── src/
-│   │   ├── components/      # Componentes React
-│   │   ├── contexts/        # Contextos (Auth)
-│   │   ├── services/        # Servicios (PDF)
-│   │   └── config/          # Configuración API
-├── backend/                 # NestJS API
-│   ├── src/
-│   │   ├── auth/           # Autenticación
-│   │   ├── entities/       # Entidades TypeORM
-│   │   └── services/       # Servicios de IA
-├── vercel.json             # Configuración Vercel
-└── package.json            # Scripts y dependencias
+├── frontend/          # React + Vite
+│   ├── package.json   # Scripts del frontend
+│   └── src/           # Código fuente React
+├── backend/           # NestJS + TypeORM
+│   ├── package.json   # Scripts del backend
+│   └── src/           # Código fuente NestJS
+├── package.json       # Scripts principales
+└── README.md         # Este archivo
 ```
 
-## 🔧 Configuración de Rutas Dinámicas
+## 🛠️ Tecnologías
 
-El proyecto utiliza rutas dinámicas configuradas en `frontend/src/config/api.ts`:
+- **Frontend:** React, Vite, Material-UI, Axios
+- **Backend:** NestJS, TypeORM, PostgreSQL, JWT
+- **Herramientas:** Nx, TypeScript, Concurrently
 
-- **Desarrollo**: `http://localhost:3000`
-- **Producción**: `https://tu-proyecto.vercel.app/api`
+## 📚 Referencias
 
-## 📚 Documentación Adicional
-
-- [Guía de Despliegue](DEPLOY.md)
-- [Configuración de Vercel](vercel.json)
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
-
-## 🆘 Soporte
-
-Para soporte técnico, contacta al equipo de desarrollo o crea un issue en el repositorio.
+- [DEV Community - Running Frontend & Backend Together](https://dev.to/sumonta056/how-to-run-frontend-backend-together-with-one-command-no-docker-needed-29nd)
+- [Medium - Concurrently for Full-Stack Development](https://medium.com/@rwijayabandu/how-to-run-frontend-and-backend-with-one-command-55d5f2ce952c)
+- [LogRocket - Running React and Express with concurrently](https://blog.logrocket.com/running-react-express-concurrently/)

@@ -2,6 +2,14 @@
   "name": "@cotizai-app/frontend",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "vite",
+    "serve:prod": "vite preview"
+  },
   "dependencies": {
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1"
