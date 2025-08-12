@@ -7,7 +7,9 @@
       "src": "backend/src/main.ts",
       "use": "@vercel/node",
       "config": {
-        "maxDuration": 30
+        "maxDuration": 30,
+        "includeFiles": ["backend/src/**/*"],
+        "excludeFiles": ["**/*.spec.ts", "**/*.test.ts", "**/node_modules/**"]
       }
     }
   ],
