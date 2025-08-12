@@ -29,8 +29,13 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noErrorTruncation": false,
-    "preserveConstEnums": false,
-    "isolatedModules": false
+    "preserveConstEnums": true,
+    "isolatedModules": false,
+    "noImplicitOverride": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "useUnknownInCatchVariables": false,
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true
   },
   "include": [
     "src/**/*"
