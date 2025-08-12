@@ -6,6 +6,7 @@
     "build": "nx build",
     "build:vercel": "nx build backend && nx build frontend",
     "vercel-build": "nx build backend && nx build frontend",
+    "build:netlify": "cd frontend && npm run build",
     "start": "nx serve",
     "dev": "nx serve",
     "dev:frontend": "nx serve frontend",

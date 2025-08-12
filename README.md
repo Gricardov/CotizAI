@@ -115,6 +115,29 @@ npm run build
 npm run vercel-build
 ```
 
+### **Build para Netlify**
+```bash
+npm run build:netlify
+```
+
+### **Despliegue en Netlify**
+El proyecto incluye configuración automática para Netlify:
+
+1. **Archivo de configuración:** `netlify.toml`
+2. **Comando de build:** `npm run build:netlify`
+3. **Directorio de publicación:** `frontend/dist`
+
+### **Variables de Entorno para Netlify**
+```env
+GEMINI_API_KEY=tu_gemini_api_key
+JWT_SECRET=tu_jwt_secret
+POSTGRES_DB=tu_base_de_datos
+POSTGRES_HOST=tu_host
+POSTGRES_PASSWORD=tu_password
+POSTGRES_PORT=5432
+POSTGRES_USER=tu_usuario
+```
+
 ## 📁 Estructura del Proyecto
 
 ```
