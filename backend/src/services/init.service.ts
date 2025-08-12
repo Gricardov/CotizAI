@@ -71,36 +71,50 @@ export class InitService implements OnModuleInit {
       });
       
       if (adminUser) {
-        const operaciones = [
-          {
-            nombre: 'Cotización para Empresa ABC',
-            fecha: new Date(),
-            estado: OperacionEstado.COMPLETADA,
-            userId: adminUser.id,
-            area: 'Comercial',
-            data: { empresa: 'Empresa ABC', proyecto: 'Sitio web corporativo' }
-          },
-          {
-            nombre: 'Análisis de sitio web XYZ',
-            fecha: new Date(Date.now() - 86400000), // Ayer
-            estado: OperacionEstado.EN_PROCESO,
-            userId: adminUser.id,
-            area: 'Marketing',
-            data: { empresa: 'Empresa XYZ', proyecto: 'Análisis SEO' }
-          },
-          {
-            nombre: 'Propuesta comercial para Startup',
-            fecha: new Date(Date.now() - 172800000), // Hace 2 días
-            estado: OperacionEstado.PENDIENTE,
-            userId: adminUser.id,
-            area: 'Comercial',
-            data: { empresa: 'Startup', proyecto: 'Aplicación móvil' }
+        const operacion1 = this.operacionRepository.create({
+          nombre: 'Cotización Web Inmobiliaria',
+          fecha: new Date('2024-01-15'),
+          estado: OperacionEstado.APROBADO,
+          userId: 1,
+          area: 'Comercial',
+          data: {
+            nombreEmpresa: 'Inmobiliaria Ejemplo SAC',
+            rubro: 'Inmobiliario',
+            servicio: 'Web Multiproyecto',
+            tipo: 'Complejo'
           }
-        ];
+        });
 
-        for (const operacionData of operaciones) {
-          const operacion = this.operacionRepository.create(operacionData);
-          await this.operacionRepository.save(operacion);
+        const operacion2 = this.operacionRepository.create({
+          nombre: 'Desarrollo E-commerce Retail',
+          fecha: new Date('2024-01-20'),
+          estado: OperacionEstado.EN_REVISION,
+          userId: 1,
+          area: 'Marketing',
+          data: {
+            nombreEmpresa: 'Retail Digital SAC',
+            rubro: 'Retail',
+            servicio: 'E-Commerce',
+            tipo: 'Complejo'
+          }
+        });
+
+        const operacion3 = this.operacionRepository.create({
+          nombre: 'Landing Page Financiera',
+          fecha: new Date('2024-01-25'),
+          estado: OperacionEstado.DESESTIMADO,
+          userId: 1,
+          area: 'TI',
+          data: {
+            nombreEmpresa: 'Banco Digital SAC',
+            rubro: 'Financiero',
+            servicio: 'Landing',
+            tipo: 'Básico'
+          }
+        });
+
+        for (const operacionData of [operacion1, operacion2, operacion3]) {
+          await this.operacionRepository.save(operacionData);
         }
         console.log('✅ Operaciones de ejemplo creadas');
       }

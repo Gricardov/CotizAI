@@ -158,14 +158,15 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('operaciones')
-  async createOperacion(@Request() req: any, @Body() operacionData: { nombre: string; fecha: Date; estado: string }) {
+  async createOperacion(@Request() req: any, @Body() operacionData: { nombre: string; fecha: Date; estado: string; area: string }) {
     if (req.user.rol !== 'admin') {
       throw new UnauthorizedException('Acceso denegado');
     }
     return await this.operacionService.createOperacion({
       ...operacionData,
       estado: operacionData.estado as OperacionEstado,
-      userId: req.user.sub
+      userId: req.user.sub,
+      area: operacionData.area || req.user.area
     });
   }
 
