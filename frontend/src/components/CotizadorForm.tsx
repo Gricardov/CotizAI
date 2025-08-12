@@ -1,61 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
   Typography,
   TextField,
-  Divider,
   Button,
-  Alert,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
-  Card,
-  CardContent,
-  CardActions,
-  InputAdornment,
+  Chip,
   Dialog,
+  DialogTitle,
   DialogContent,
+  DialogActions,
   CircularProgress,
+  Alert,
+  Divider,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  InputAdornment
 } from '@mui/material';
 import {
   Add as AddIcon,
   Delete as DeleteIcon,
   DragIndicator as DragIcon,
-  Analytics as AnalyticsIcon,
   SmartToy as RobotIcon,
-  PictureAsPdf as PdfIcon,
+  Language as LanguageIcon,
   Save as SaveIcon,
+  PictureAsPdf as PdfIcon
 } from '@mui/icons-material';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
-import {
-  CSS,
-} from '@dnd-kit/utilities';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import axios from 'axios';
-import { PDFGeneratorService, CotizacionData } from '../services/pdf-generator.service';
+import API_ENDPOINTS from '../config/api';
+import { PDFGeneratorService } from '../services/pdf-generator.service';
 
 interface Caracteristica {
   id: string;
@@ -526,7 +516,7 @@ interface CotizadorFormProps {
 
 export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, onCotizacionLoaded }) => {
   const [formData, setFormData] = useState({
-    fecha: '',
+    fecha: new Date().toISOString().split('T')[0],
     nombreEmpresa: '',
     nombreProyecto: '',
     nombreContacto: '',
@@ -540,27 +530,42 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     descripcionProyecto: '',
     urlAnalisis: '',
     detallePagina: '',
-    duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
+    duracionProyecto: '',
     crmSeleccionado: '',
     crmOtro: '',
+    tiempoAnalizado: ''
   });
 
-  const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>(
-    caracteristicasDefault.map((texto, index) => ({
-      id: `caracteristica-${index}`,
-      contenido: texto
-    }))
-  );
+  const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([
+    { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
+    { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
+    { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
+    { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
+    { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
+    { id: '6', contenido: 'Funcionalidades Avanzadas' },
+    { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
+  ]);
 
-  const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>(itemsPropuestaDefault);
+  const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>([
+    { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
+  ]);
+
   const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>([]);
-
-  const [success, setSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [analizandoWeb, setAnalizandoWeb] = useState(false);
-  const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
+  const [analizandoWeb, setAnalizandoWeb] = useState(false);
+  const [generandoDescripcion, setGenerandoDescripcion] = useState(false);
+  const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -590,9 +595,10 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
           descripcionProyecto: cotizacionToLoad.descripcionProyecto || '',
           urlAnalisis: cotizacionToLoad.urlAnalisis || '',
           detallePagina: cotizacionToLoad.detallePagina || '',
-          duracionProyecto: cotizacionToLoad.duracionProyecto || prev.duracionProyecto,
+          duracionProyecto: cotizacionToLoad.duracionProyecto || '',
           crmSeleccionado: cotizacionToLoad.crmSeleccionado || '',
           crmOtro: cotizacionToLoad.crmOtro || '',
+          tiempoAnalizado: cotizacionToLoad.tiempoAnalizado || ''
         }));
 
         // Cargar características
@@ -743,6 +749,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
       setCaracteristicas((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over?.id);
+
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -780,7 +787,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     }
   };
 
-  const handleAnalizarWeb = async () => {
+  const analizarEstructuraWeb = async () => {
     if (!formData.urlAnalisis) {
       alert('Por favor ingresa una URL para analizar');
       return;
@@ -794,11 +801,15 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     setAnalizandoWeb(true);
     
     try {
-      const response = await axios.post('http://localhost:3000/analizar-estructura-web', {
+      const response = await axios.post(API_ENDPOINTS.ANALIZAR_ESTRUCTURA_WEB, {
         url: formData.urlAnalisis,
         rubro: formData.rubro,
         servicio: formData.servicio,
         tipo: formData.tipo
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (response.data.success) {
@@ -883,9 +894,13 @@ Por favor, verifique la URL e intente nuevamente.`
 
   const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
     try {
-      const response = await axios.post('http://localhost:3000/generar-descripcion-proyecto', {
+      const response = await axios.post(API_ENDPOINTS.GENERAR_DESCRIPCION_PROYECTO, {
         rubro,
         servicio
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (response.data && response.data.descripcion) {
@@ -899,7 +914,7 @@ Por favor, verifique la URL e intente nuevamente.`
     }
   };
 
-  const mejorarRequerimientosConIA = async () => {
+  const mejorarRequerimientos = async () => {
     if (!formData.promptsRequerimientos.trim()) {
       alert('Por favor, ingrese los requerimientos técnicos antes de mejorarlos.');
       return;
@@ -907,10 +922,14 @@ Por favor, verifique la URL e intente nuevamente.`
 
     setMejorandoRequerimientos(true);
     try {
-      const response = await axios.post('http://localhost:3000/mejorar-requerimientos', {
+      const response = await axios.post(API_ENDPOINTS.MEJORAR_REQUERIMIENTOS, {
         requerimientos: formData.promptsRequerimientos,
         rubro: formData.rubro,
         servicio: formData.servicio
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
       if (response.data && response.data.requerimientosMejorados) {
@@ -952,7 +971,7 @@ Por favor, verifique la URL e intente nuevamente.`
     
     try {
       // Preparar datos para el PDF
-      const cotizacionData: CotizacionData = {
+      const cotizacionData = {
         fecha: formData.fecha,
         nombreEmpresa: formData.nombreEmpresa,
         nombreProyecto: formData.nombreProyecto,
@@ -973,7 +992,7 @@ Por favor, verifique la URL e intente nuevamente.`
         caracteristicas: caracteristicas,
         itemsPropuesta: itemsPropuesta,
         serviciosAdicionales: serviciosAdicionales,
-        tiempoAnalizado: formData.duracionProyecto
+        tiempoAnalizado: formData.tiempoAnalizado
       };
 
       // Generar PDF
@@ -992,51 +1011,45 @@ Por favor, verifique la URL e intente nuevamente.`
     }
   };
 
-  const handleGuardar = async () => {
-    setGuardando(true);
-    setGuardadoExitoso(false);
-    
+  const guardarCotizacion = async () => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('No hay token de autenticación');
-      }
-
-      const nombreCotizacion = formData.nombreEmpresa 
-        ? `Cotización - ${formData.nombreEmpresa}`
-        : 'Cotización sin nombre';
-
       const cotizacionData = {
-        nombre: nombreCotizacion,
-        data: {
-          ...formData,
-          caracteristicas: caracteristicas,
-          itemsPropuesta: itemsPropuesta,
-          serviciosAdicionales: serviciosAdicionales,
-          requerimientosMejorados: formData.requerimientosMejorados,
-          fechaCreacion: new Date().toISOString()
-        }
+        fecha: formData.fecha,
+        nombreEmpresa: formData.nombreEmpresa,
+        nombreProyecto: formData.nombreProyecto,
+        nombreContacto: formData.nombreContacto,
+        correoContacto: formData.correoContacto,
+        rubro: formData.rubro,
+        servicio: formData.servicio,
+        tipo: formData.tipo,
+        promptsRequerimientos: formData.promptsRequerimientos,
+        requerimientosMejorados: formData.requerimientosMejorados,
+        servicioNecesidad: formData.servicioNecesidad,
+        descripcionProyecto: formData.descripcionProyecto,
+        urlAnalisis: formData.urlAnalisis,
+        detallePagina: formData.detallePagina,
+        duracionProyecto: formData.duracionProyecto,
+        crmSeleccionado: formData.crmSeleccionado,
+        crmOtro: formData.crmOtro,
+        caracteristicas,
+        itemsPropuesta,
+        serviciosAdicionales,
+        tiempoAnalizado: formData.tiempoAnalizado
       };
 
-      const response = await axios.post(
-        'http://localhost:3000/auth/guardar-cotizacion',
-        cotizacionData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+      await axios.post(API_ENDPOINTS.GUARDAR_COTIZACION, cotizacionData, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
-      );
+      });
 
-      if (response.status === 201) {
-        setGuardadoExitoso(true);
-        setTimeout(() => setGuardadoExitoso(false), 3000);
-      }
+      setGuardando(false);
+      setGuardadoExitoso(true);
+      setTimeout(() => setGuardadoExitoso(false), 3000);
     } catch (error) {
-      console.error('Error al guardar la cotización:', error);
-      alert('Error al guardar la cotización. Inténtalo de nuevo.');
-    } finally {
+      console.error('Error guardando cotización:', error);
+      setError('Error al guardar la cotización');
       setGuardando(false);
     }
   };
@@ -1334,7 +1347,7 @@ Por favor, verifique la URL e intente nuevamente.`
                 
                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                   <Button
-                    onClick={mejorarRequerimientosConIA}
+                    onClick={mejorarRequerimientos}
                     variant="contained"
                     startIcon={<RobotIcon />}
                     disabled={mejorandoRequerimientos}
@@ -1707,9 +1720,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 />
                 <Button
                   variant="contained"
-                  onClick={handleAnalizarWeb}
+                  onClick={analizarEstructuraWeb}
                   disabled={analizandoWeb || !formData.urlAnalisis}
-                  startIcon={analizandoWeb ? null : <AnalyticsIcon />}
+                  startIcon={analizandoWeb ? null : <LanguageIcon />}
                   sx={{
                     py: 1.8,
                     px: 3,
@@ -2202,7 +2215,7 @@ Por favor, verifique la URL e intente nuevamente.`
                 variant="contained"
                 size="large"
                 startIcon={<SaveIcon />}
-                onClick={handleGuardar}
+                onClick={guardarCotizacion}
                 disabled={guardando}
                 sx={{
                   px: 4,

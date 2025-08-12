@@ -6,6 +6,8 @@
     "dev": "concurrently \"nx serve backend\" \"nx serve frontend\"",
     "start": "concurrently \"nx serve backend\" \"nx serve frontend\"",
     "build": "nx build backend && nx build frontend",
+    "build:vercel": "nx build backend && nx build frontend",
+    "vercel-build": "nx build backend && nx build frontend",
     "test": "nx test backend && nx test frontend",
     "backend": "nx serve backend",
     "frontend": "nx serve frontend"

@@ -30,6 +30,7 @@ import {
   FilterList as FilterIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import API_ENDPOINTS from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Operacion {
@@ -91,7 +92,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
   const loadAreas = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/auth/areas', {
+      const response = await axios.get(API_ENDPOINTS.AREAS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -115,7 +116,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
         area: filtroArea
       });
 
-      const response = await axios.get(`http://localhost:3000/auth/operaciones?${params}`, {
+      const response = await axios.get(`${API_ENDPOINTS.OPERACIONES}?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -167,7 +168,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
     try {
       const token = localStorage.getItem('token');
       if (editingOperacion) {
-        await axios.put(`http://localhost:3000/auth/operaciones/${editingOperacion.id}`, {
+        await axios.put(`${API_ENDPOINTS.OPERACIONES}/${editingOperacion.id}`, {
           id: editingOperacion.id,
           operacionData: formData
         }, {
@@ -176,7 +177,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
           }
         });
       } else {
-        await axios.post('http://localhost:3000/auth/operaciones', formData, {
+        await axios.post(API_ENDPOINTS.OPERACIONES, formData, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -196,8 +197,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
     if (window.confirm('¿Estás seguro de que quieres eliminar esta operación?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`http://localhost:3000/auth/operaciones/${id}`, {
-          data: { id },
+        await axios.delete(`${API_ENDPOINTS.OPERACIONES}/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

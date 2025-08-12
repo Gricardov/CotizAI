@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import API_ENDPOINTS from '../config/api';
 
 interface User {
   id: number;
@@ -38,53 +39,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      validateToken();
+      validateToken(token).then((isValid) => {
+        if (!isValid) {
+          localStorage.removeItem('token');
+        }
+        setLoading(false);
+      });
     } else {
       setLoading(false);
     }
   }, []);
 
-  const validateToken = async () => {
+  const validateToken = async (token: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const response = await axios.get('http://localhost:3000/auth/validate');
+      const response = await axios.get(API_ENDPOINTS.VALIDATE, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       if (response.data.valid) {
         setUser(response.data.user);
-      } else {
-        localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
+        return true;
       }
+      return false;
     } catch (error) {
-      console.error('Error validating token:', error);
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setLoading(false);
+      console.error('Token validation error:', error);
+      return false;
     }
   };
 
   const login = async (username: string, password: string, area: string): Promise<boolean> => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
+      const response = await axios.post(API_ENDPOINTS.LOGIN, {
         username,
         password,
         area
       });
 
-      const { access_token, user } = response.data;
-      
-      localStorage.setItem('token', access_token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
-      
-      setUser(user);
-      return true;
+      if (response.data.access_token) {
+        const token = response.data.access_token;
+        localStorage.setItem('token', token);
+        setUser(response.data.user);
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error('Login error:', error);
       return false;

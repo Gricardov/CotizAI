@@ -1,186 +1,154 @@
-# CotizAI - Sistema de Cotización
+# 🚀 CotizAI - Sistema de Cotización Inteligente
 
-## 🚀 Descripción
+## 📋 Descripción
 
-CotizAI es una aplicación fullstack desarrollada con React (frontend) y NestJS (backend) en un monorepo Nx. El sistema incluye:
+CotizAI es una aplicación web moderna para generar cotizaciones profesionales utilizando inteligencia artificial. El sistema incluye un frontend en React con Material-UI y un backend en NestJS con integración de IA.
 
-- **Sistema de autenticación JWT** con validación de roles
-- **Dashboard con sidebar retráctil**
-- **Formulario de cotización moderno**
-- **Diseño responsive con Material-UI**
+## 🏗️ Arquitectura
 
-## 🛠️ Tecnologías
+- **Frontend**: React + TypeScript + Material-UI
+- **Backend**: NestJS + TypeScript + PostgreSQL
+- **IA**: OpenAI GPT + Google Gemini
+- **Autenticación**: JWT
+- **Despliegue**: Vercel (configurado)
 
-### Frontend
-- React 19
-- TypeScript
-- Material-UI (MUI)
-- Vite
-- Axios
+## 🚀 Características
 
-### Backend
-- NestJS
-- TypeScript
-- JWT Authentication
-- Passport
-- Express
+### ✨ Funcionalidades Principales
+- **Autenticación**: Login con roles (admin/cotizador)
+- **Cotizador**: Formulario inteligente con IA
+- **Gestión de Operaciones**: CRUD de cotizaciones
+- **Análisis Web**: Crawler automático de sitios web
+- **Generación de PDF**: Cotizaciones profesionales
+- **IA Integrada**: Descripción de proyectos y análisis
 
-### Herramientas
-- Nx Monorepo
-- ESLint
-- Prettier
+### 🎯 Roles de Usuario
+- **Admin**: Acceso completo (crear, editar, eliminar)
+- **Cotizador**: Solo lectura y creación de cotizaciones
 
-## 📦 Instalación
+## 🛠️ Instalación
 
-1. **Clonar el repositorio:**
+### Prerrequisitos
+- Node.js 18+
+- PostgreSQL
+- npm o yarn
+
+### 1. Clonar el repositorio
 ```bash
+git clone <repository-url>
 cd cotizai-app
 ```
 
-2. **Instalar dependencias:**
+### 2. Instalar dependencias
 ```bash
 npm install
 ```
 
-## 🚀 Comandos Disponibles
-
-### Ejecutar ambas aplicaciones simultáneamente:
+### 3. Configurar base de datos
 ```bash
-npm run dev
-# o
-npm start
+# Crear base de datos PostgreSQL
+createdb cotizai
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales
 ```
 
-### Ejecutar aplicaciones por separado:
+### 4. Ejecutar migraciones
 ```bash
-# Solo backend (puerto 3000)
+cd backend
+npm run migration:run
+```
+
+### 5. Iniciar desarrollo
+```bash
+# Terminal 1 - Backend
 npm run backend
 
-# Solo frontend (puerto 4200)
+# Terminal 2 - Frontend
 npm run frontend
+
+# O ambos juntos
+npm run dev
 ```
 
-### Construir para producción:
-```bash
-npm run build
-```
+## 🌐 URLs de Desarrollo
 
-### Ejecutar tests:
-```bash
-npm run test
-```
+- **Frontend**: http://localhost:4200
+- **Backend**: http://localhost:3000
+- **API**: http://localhost:3000/api
 
-## 🔐 Credenciales de Acceso
+## 🚀 Despliegue en Vercel
 
-Para acceder al sistema, usar las siguientes credenciales:
+### Configuración Automática
+El proyecto está configurado para desplegar automáticamente en Vercel:
 
-- **Usuario:** `admin`
-- **Contraseña:** `12345`
-- **Área:** Seleccionar cualquiera de las 5 disponibles:
-  - Comercial
-  - Administración
-  - Marketing
-  - Ti
-  - Medios
+1. **Variables de entorno en Vercel:**
+   ```
+   DATABASE_HOST=your-db-host
+   DATABASE_PORT=5432
+   DATABASE_USERNAME=your-username
+   DATABASE_PASSWORD=your-password
+   DATABASE_NAME=your-db-name
+   JWT_SECRET=your-jwt-secret
+   OPENAI_API_KEY=your-openai-key
+   GOOGLE_AI_API_KEY=your-google-ai-key
+   ```
 
-## 🏗️ Estructura del Proyecto
+2. **Desplegar:**
+   ```bash
+   npm i -g vercel
+   vercel login
+   vercel
+   ```
+
+### URLs de Producción
+- **Frontend**: https://tu-proyecto.vercel.app
+- **API**: https://tu-proyecto.vercel.app/api
+
+## 📁 Estructura del Proyecto
 
 ```
 cotizai-app/
-├── backend/                 # API NestJS
+├── frontend/                 # React App
 │   ├── src/
-│   │   ├── app/            # Módulo principal
-│   │   ├── auth/           # Autenticación JWT
-│   │   └── main.ts         # Punto de entrada
-├── frontend/               # Aplicación React
+│   │   ├── components/      # Componentes React
+│   │   ├── contexts/        # Contextos (Auth)
+│   │   ├── services/        # Servicios (PDF)
+│   │   └── config/          # Configuración API
+├── backend/                 # NestJS API
 │   ├── src/
-│   │   ├── app/            # Componente principal
-│   │   ├── components/     # Componentes UI
-│   │   │   ├── Login.tsx
-│   │   │   ├── Dashboard.tsx
-│   │   │   └── CotizadorForm.tsx
-│   │   └── contexts/       # Contextos React
-│   │       └── AuthContext.tsx
-└── package.json           # Scripts y dependencias
+│   │   ├── auth/           # Autenticación
+│   │   ├── entities/       # Entidades TypeORM
+│   │   └── services/       # Servicios de IA
+├── vercel.json             # Configuración Vercel
+└── package.json            # Scripts y dependencias
 ```
 
-## 🎯 Funcionalidades
+## 🔧 Configuración de Rutas Dinámicas
 
-### ✅ Sistema de Autenticación
-- Login con usuario, contraseña y área
-- Validación JWT en backend
-- Protección de rutas por rol
-- Persistencia de sesión en localStorage
+El proyecto utiliza rutas dinámicas configuradas en `frontend/src/config/api.ts`:
 
-### ✅ Dashboard
-- Sidebar retráctil con navegación
-- Información del usuario logueado
-- Opción de logout
-- Diseño responsive
+- **Desarrollo**: `http://localhost:3000`
+- **Producción**: `https://tu-proyecto.vercel.app/api`
 
-### ✅ Formulario de Cotización
-- **Datos fijos de la empresa:**
-  - Razón Social: Alavista Lab SAC
-  - RUC: 20607124711
-  - Dirección: Av. Benavides 2975, Oficina 809, Miraflores
-  - Contacto: Juan Jesús Astete Meza
-  - Teléfono: 959271576
+## 📚 Documentación Adicional
 
-- **Campos editables:**
-  - Fecha (selector de calendario)
-  - Nombre de empresa
-  - Proyecto (texto multilínea)
-  - Nombre del contacto
-  - Correo de contacto
-
-## 🔧 Configuración de Desarrollo
-
-### Puertos por defecto:
-- **Frontend:** http://localhost:4200
-- **Backend:** http://localhost:3000
-
-### Variables de entorno:
-El sistema usa configuraciones por defecto, pero en producción se recomienda:
-- Cambiar la clave secreta JWT
-- Configurar variables de entorno para la base de datos
-- Establecer CORS apropiados para producción
-
-## 🎨 Diseño
-
-El sistema utiliza un esquema de colores moderno:
-- **Primario:** #667eea (azul)
-- **Secundario:** #764ba2 (púrpura)
-- **Gradientes:** Linear gradients para botones y headers
-- **UI:** Material Design con componentes de MUI
-
-## 📱 Responsive Design
-
-La aplicación está optimizada para:
-- Desktop (1200px+)
-- Tablet (768px - 1199px)
-- Mobile (< 768px)
-
-## 🚀 Próximos Pasos
-
-- [ ] Integración con base de datos real
-- [ ] Generación de PDFs para cotizaciones
-- [ ] Sistema de notificaciones
-- [ ] Dashboard con métricas
-- [ ] Historial de cotizaciones
-- [ ] Roles adicionales de usuario
+- [Guía de Despliegue](DEPLOY.md)
+- [Configuración de Vercel](vercel.json)
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear una rama para la feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit los cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abrir un Pull Request
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
----
+## 🆘 Soporte
 
-Desarrollado con ❤️ usando Nx, React y NestJS.
+Para soporte técnico, contacta al equipo de desarrollo o crea un issue en el repositorio.
