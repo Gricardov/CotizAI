@@ -5,7 +5,10 @@
   "builds": [
     {
       "src": "backend/src/main.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
     }
   ],
   "routes": [
@@ -20,10 +23,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "backend/src/main.ts": {
-      "maxDuration": 30
-    }
   }
 } 
