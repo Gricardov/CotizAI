@@ -32,6 +32,7 @@ import {
 import axios from 'axios';
 import API_ENDPOINTS from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
+import apiClient from '../config/axios';
 
 interface Operacion {
   id: number;
@@ -91,12 +92,7 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
 
   const loadAreas = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(API_ENDPOINTS.AREAS, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get(API_ENDPOINTS.AREAS);
       console.log('Áreas cargadas:', response.data);
       setAreas(response.data);
     } catch (error) {
@@ -109,18 +105,13 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
   const loadOperaciones = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const params = new URLSearchParams({
         pagina: pagina.toString(),
         porPagina: operacionesPorPagina.toString(),
         area: filtroArea
       });
 
-      const response = await axios.get(`${API_ENDPOINTS.OPERACIONES}?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get(`${API_ENDPOINTS.OPERACIONES}?${params}`);
       
       setOperaciones(response.data.operaciones);
       setTotalPaginas(response.data.totalPaginas);
@@ -166,22 +157,13 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
       if (editingOperacion) {
-        await axios.put(`${API_ENDPOINTS.OPERACIONES}/${editingOperacion.id}`, {
+        await apiClient.put(`${API_ENDPOINTS.OPERACIONES}/${editingOperacion.id}`, {
           id: editingOperacion.id,
           operacionData: formData
-        }, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
         });
       } else {
-        await axios.post(API_ENDPOINTS.OPERACIONES, formData, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        await apiClient.post(API_ENDPOINTS.OPERACIONES, formData);
       }
       handleCloseDialog();
       loadOperaciones();
@@ -192,21 +174,16 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
   };
 
   const handleDelete = async (id: number) => {
-    if (!canEdit) return; // Solo admin puede eliminar
-    
-    if (window.confirm('¿Estás seguro de que quieres eliminar esta operación?')) {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`${API_ENDPOINTS.OPERACIONES}/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        loadOperaciones();
-      } catch (error) {
-        console.error('Error deleting operacion:', error);
-        setError('Error al eliminar la operación');
-      }
+    if (!window.confirm('¿Estás seguro de que quieres eliminar esta operación?')) {
+      return;
+    }
+
+    try {
+      await apiClient.delete(`${API_ENDPOINTS.OPERACIONES}/${id}`);
+      loadOperaciones();
+    } catch (error) {
+      console.error('Error deleting operacion:', error);
+      setError('Error al eliminar la operación');
     }
   };
 

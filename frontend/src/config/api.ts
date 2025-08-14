@@ -1,7 +1,7 @@
 // Configuración de la API
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? process.env.API_URL || 'https://cotizai.templeluna.app'
-  : 'http://localhost:3000';
+  : 'http://localhost:4000'; // Cambiado a puerto 4000 para el backend
 
 export const API_ENDPOINTS = {
   // Auth endpoints

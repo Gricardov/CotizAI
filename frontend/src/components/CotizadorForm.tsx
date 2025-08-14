@@ -43,7 +43,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import API_ENDPOINTS from '../config/api';
 import { PDFGeneratorService } from '../services/pdf-generator.service';
 
@@ -801,7 +801,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     setAnalizandoWeb(true);
     
     try {
-      const response = await axios.post(API_ENDPOINTS.ANALIZAR_ESTRUCTURA_WEB, {
+      const response = await apiClient.post(API_ENDPOINTS.ANALIZAR_ESTRUCTURA_WEB, {
         url: formData.urlAnalisis,
         rubro: formData.rubro,
         servicio: formData.servicio,
@@ -894,7 +894,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
   const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
     try {
-      const response = await axios.post(API_ENDPOINTS.GENERAR_DESCRIPCION_PROYECTO, {
+      const response = await apiClient.post(API_ENDPOINTS.GENERAR_DESCRIPCION_PROYECTO, {
         rubro,
         servicio
       }, {
@@ -922,7 +922,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
     setMejorandoRequerimientos(true);
     try {
-      const response = await axios.post(API_ENDPOINTS.MEJORAR_REQUERIMIENTOS, {
+      const response = await apiClient.post(API_ENDPOINTS.MEJORAR_REQUERIMIENTOS, {
         requerimientos: formData.promptsRequerimientos,
         rubro: formData.rubro,
         servicio: formData.servicio
@@ -1038,7 +1038,7 @@ Por favor, verifique la URL e intente nuevamente.`
         tiempoAnalizado: formData.tiempoAnalizado
       };
 
-      await axios.post(API_ENDPOINTS.GUARDAR_COTIZACION, cotizacionData, {
+      await apiClient.post(API_ENDPOINTS.GUARDAR_COTIZACION, cotizacionData, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

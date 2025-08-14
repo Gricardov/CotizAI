@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
+import apiClient from '../config/axios';
 import API_ENDPOINTS from '../config/api';
 
 interface User {
@@ -52,11 +52,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const validateToken = async (token: string): Promise<boolean> => {
     try {
-      const response = await axios.get(API_ENDPOINTS.VALIDATE, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.get(API_ENDPOINTS.VALIDATE);
       
       if (response.data.valid) {
         setUser(response.data.user);
@@ -71,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (username: string, password: string, area: string): Promise<boolean> => {
     try {
-      const response = await axios.post(API_ENDPOINTS.LOGIN, {
+      const response = await apiClient.post(API_ENDPOINTS.LOGIN, {
         username,
         password,
         area
@@ -92,7 +88,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
