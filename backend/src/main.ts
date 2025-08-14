@@ -9,6 +9,9 @@ import * as path from 'path';
 // Cargar variables de entorno desde el directorio raíz del proyecto
 config({ path: path.resolve(process.cwd(), '../.env') });
 
+// También intentar cargar desde el directorio actual
+config();
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 
@@ -21,7 +24,13 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(process.env.PORT || 4000);
-  console.log(`🚀 Servidor ejecutándose en http://localhost:${process.env.PORT || 4000}`);
+  const port = process.env.PORT || 4000;
+  console.log('🔧 Configuración del puerto:');
+  console.log('   - PORT desde .env:', process.env.PORT);
+  console.log('   - Puerto final:', port);
+  console.log('   - Directorio actual:', process.cwd());
+  
+  await app.listen(port);
+  console.log(`🚀 Servidor ejecutándose en http://localhost:${port}`);
 }
 bootstrap();
