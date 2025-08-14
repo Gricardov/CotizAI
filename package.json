@@ -16,7 +16,7 @@
     "start:backend": "nx serve backend",
     "start:both": "concurrently --names 'FRONTEND,BACKEND' --prefix-colors 'green,blue' \"npm run start:frontend\" \"npm run start:backend\"",
     "frontend": "nx serve frontend --port 4200",
-    "backend": "nx serve backend --port 3000",
+    "backend": "nx serve backend",
     "both": "concurrently --names 'FRONTEND,BACKEND' --prefix-colors 'green,blue' \"npm run frontend\" \"npm run backend\"",
     "cd:frontend": "cd frontend",
     "cd:backend": "cd backend",

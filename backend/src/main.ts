@@ -3,6 +3,12 @@
  * This is only a minimal backend to get started.
  */
 
+import { config } from 'dotenv';
+import * as path from 'path';
+
+// Cargar variables de entorno desde el directorio raíz del proyecto
+config({ path: path.resolve(process.cwd(), '../.env') });
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 

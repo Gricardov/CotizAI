@@ -10,6 +10,7 @@ import { WebCrawlerService } from '../services/web-crawler.service';
 import { AIWebAnalyzerService } from '../services/ai-web-analyzer.service';
 import { AITimeAnalyzerService } from '../services/ai-time-analyzer.service';
 import { InitService } from '../services/init.service';
+import * as path from 'path';
 
 @Module({
   imports: [
