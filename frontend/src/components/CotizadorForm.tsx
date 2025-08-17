@@ -181,12 +181,12 @@ interface SortableCardProps {
   canDelete: boolean;
 }
 
-const SortableCard: React.FC<SortableCardProps> = ({ 
-  caracteristica, 
-  index, 
-  onEdit, 
-  onDelete, 
-  canDelete 
+const SortableCard: React.FC<SortableCardProps> = ({
+  caracteristica,
+  index,
+  onEdit,
+  onDelete,
+  canDelete
 }) => {
   const {
     attributes,
@@ -204,10 +204,10 @@ const SortableCard: React.FC<SortableCardProps> = ({
   };
 
   return (
-    <Card 
-      ref={setNodeRef} 
-      style={style} 
-      sx={{ 
+    <Card
+      ref={setNodeRef}
+      style={style}
+      sx={{
         boxShadow: 2,
         cursor: isDragging ? 'grabbing' : 'auto',
         '&:hover': {
@@ -219,7 +219,7 @@ const SortableCard: React.FC<SortableCardProps> = ({
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
           <IconButton
             size="small"
-            sx={{ 
+            sx={{
               cursor: 'grab',
               '&:active': { cursor: 'grabbing' },
               color: '#999',
@@ -270,13 +270,13 @@ const SortableCard: React.FC<SortableCardProps> = ({
 // Componente de robot pensando
 const RobotThinking: React.FC = () => {
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      p: 4 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      p: 4
     }}>
-      <Box sx={{ 
+      <Box sx={{
         position: 'relative',
         animation: 'bounce 2s infinite',
         '@keyframes bounce': {
@@ -294,8 +294,8 @@ const RobotThinking: React.FC = () => {
           },
         },
       }}>
-        <RobotIcon sx={{ 
-          fontSize: 60, 
+        <RobotIcon sx={{
+          fontSize: 60,
           color: '#667eea',
           filter: 'drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))',
         }} />
@@ -326,14 +326,14 @@ const RobotThinking: React.FC = () => {
         Analizando estructura web...
       </Typography>
       <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1, maxWidth: 300 }}>
-        🔍 Detectando secciones existentes<br/>
-        📋 Identificando contenido faltante<br/>
-        🎯 Evaluando estructura por sector<br/>
+        🔍 Detectando secciones existentes<br />
+        📋 Identificando contenido faltante<br />
+        🎯 Evaluando estructura por sector<br />
         💡 Generando recomendaciones IA
       </Typography>
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 1, 
+      <Box sx={{
+        display: 'flex',
+        gap: 1,
         mt: 3,
         animation: 'dots 1.5s infinite',
         '@keyframes dots': {
@@ -348,10 +348,10 @@ const RobotThinking: React.FC = () => {
           },
         },
       }}>
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot1 1.5s infinite',
           '@keyframes dot1': {
@@ -359,10 +359,10 @@ const RobotThinking: React.FC = () => {
             '40%': { opacity: 1 },
           },
         }} />
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot2 1.5s infinite',
           '@keyframes dot2': {
@@ -371,10 +371,10 @@ const RobotThinking: React.FC = () => {
           },
           animationDelay: '0.2s',
         }} />
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot3 1.5s infinite',
           '@keyframes dot3': {
@@ -391,13 +391,13 @@ const RobotThinking: React.FC = () => {
 // Componente específico para mejora de requerimientos
 const RobotMejorandoRequerimientos: React.FC = () => {
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      p: 4 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      p: 4
     }}>
-      <Box sx={{ 
+      <Box sx={{
         position: 'relative',
         animation: 'bounce 2s infinite',
         '@keyframes bounce': {
@@ -415,8 +415,8 @@ const RobotMejorandoRequerimientos: React.FC = () => {
           },
         },
       }}>
-        <RobotIcon sx={{ 
-          fontSize: 60, 
+        <RobotIcon sx={{
+          fontSize: 60,
           color: '#667eea',
           filter: 'drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))',
         }} />
@@ -447,14 +447,14 @@ const RobotMejorandoRequerimientos: React.FC = () => {
         Mejorando requerimientos...
       </Typography>
       <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1, maxWidth: 300 }}>
-        🤖 Analizando requerimientos técnicos<br/>
-        ✨ Generando características mejoradas<br/>
-        🎯 Optimizando para el sector<br/>
+        🤖 Analizando requerimientos técnicos<br />
+        ✨ Generando características mejoradas<br />
+        🎯 Optimizando para el sector<br />
         💡 Aplicando mejores prácticas
       </Typography>
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 1, 
+      <Box sx={{
+        display: 'flex',
+        gap: 1,
         mt: 3,
         animation: 'dots 1.5s infinite',
         '@keyframes dots': {
@@ -469,10 +469,10 @@ const RobotMejorandoRequerimientos: React.FC = () => {
           },
         },
       }}>
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot1 1.5s infinite',
           '@keyframes dot1': {
@@ -480,10 +480,10 @@ const RobotMejorandoRequerimientos: React.FC = () => {
             '40%': { opacity: 1 },
           },
         }} />
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot2 1.5s infinite',
           '@keyframes dot2': {
@@ -492,10 +492,10 @@ const RobotMejorandoRequerimientos: React.FC = () => {
           },
           animationDelay: '0.2s',
         }} />
-        <Box sx={{ 
-          width: 8, 
-          height: 8, 
-          borderRadius: '50%', 
+        <Box sx={{
+          width: 8,
+          height: 8,
+          borderRadius: '50%',
           backgroundColor: 'currentColor',
           animation: 'dot3 1.5s infinite',
           '@keyframes dot3': {
@@ -530,7 +530,8 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     descripcionProyecto: '',
     urlAnalisis: '',
     detallePagina: '',
-    duracionProyecto: '',
+    duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
+    formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
     crmSeleccionado: '',
     crmOtro: '',
     tiempoAnalizado: ''
@@ -596,6 +597,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
           urlAnalisis: cotizacionToLoad.urlAnalisis || '',
           detallePagina: cotizacionToLoad.detallePagina || '',
           duracionProyecto: cotizacionToLoad.duracionProyecto || '',
+          formaPago: cotizacionToLoad.formaPago || '',
           crmSeleccionado: cotizacionToLoad.crmSeleccionado || '',
           crmOtro: cotizacionToLoad.crmOtro || '',
           tiempoAnalizado: cotizacionToLoad.tiempoAnalizado || ''
@@ -615,7 +617,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
         if (cotizacionToLoad.serviciosAdicionales && Array.isArray(cotizacionToLoad.serviciosAdicionales)) {
           setServiciosAdicionales(cotizacionToLoad.serviciosAdicionales);
         }
-        
+
         // Mostrar mensaje de éxito
         setSuccessMessage('¡Cotización cargada exitosamente desde la base de datos!');
         setSuccess(true);
@@ -660,7 +662,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     setItemsPropuesta(prev => prev.map(item => {
       if (item.id === id) {
         const updatedItem = { ...item, [field]: value };
-        
+
         // Recalcular cuando cambien monto o descuento
         if (field === 'monto' || field === 'descuento') {
           const montoValue = field === 'monto' ? value : updatedItem.monto;
@@ -668,7 +670,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
           const calculatedValues = calcularItemPropuesta(montoValue, descuentoValue);
           return { ...updatedItem, ...calculatedValues };
         }
-        
+
         return updatedItem;
       }
       return item;
@@ -680,13 +682,13 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     setServiciosAdicionales(prev => prev.map(servicio => {
       if (servicio.id === id) {
         const updatedServicio = { ...servicio, [field]: value };
-        
+
         // Recalcular cuando cambie el monto
         if (field === 'monto') {
           const calculatedValues = calcularServicioAdicional(value);
           return { ...updatedServicio, ...calculatedValues };
         }
-        
+
         return updatedServicio;
       }
       return servicio;
@@ -734,7 +736,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     const totalPropuesta = itemsPropuesta.reduce((sum, item) => sum + item.total, 0);
     const totalServicios = serviciosAdicionales.reduce((sum, servicio) => sum + servicio.total, 0);
     const granTotal = totalPropuesta + totalServicios;
-    
+
     return {
       totalPropuesta: totalPropuesta.toFixed(2),
       totalServicios: totalServicios.toFixed(2),
@@ -771,7 +773,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
           [field]: value,
           servicioNecesidad: generarTextoServicio(newFormData.rubro, newFormData.servicio)
         }));
-        
+
         // Generar descripción del proyecto automáticamente
         generarDescripcionProyecto(newFormData.rubro, newFormData.servicio);
       }
@@ -799,7 +801,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     }
 
     setAnalizandoWeb(true);
-    
+
     try {
       const response = await apiClient.post(API_ENDPOINTS.ANALIZAR_ESTRUCTURA_WEB, {
         url: formData.urlAnalisis,
@@ -814,7 +816,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
 
       if (response.data.success) {
         const structureData = response.data.data;
-        
+
         // Mostrar solo el análisis en el formato específico solicitado
         setFormData(prev => ({
           ...prev,
@@ -850,11 +852,11 @@ Para maximizar el potencial de su sitio web en el sector ${formData.rubro.toLowe
 • Sección "Nosotros" con historia y valores de la empresa
 
 🔧 FUNCIONALIDADES ESPECÍFICAS DEL SECTOR:
-${formData.rubro === 'Inmobiliario' ? 
-  '• Galería de propiedades con filtros avanzados\n• Calculadora de préstamos\n• Sistema de reservas online\n• Tours virtuales' :
-  formData.rubro === 'Retail' ? 
-  '• Catálogo de productos con carrito de compras\n• Sistema de pagos online\n• Reviews y ratings\n• Programa de lealtad' :
-  '• Calculadoras financieras\n• Simuladores de crédito\n• Dashboard personalizado\n• Sistema de seguridad 2FA'}
+${formData.rubro === 'Inmobiliario' ?
+            '• Galería de propiedades con filtros avanzados\n• Calculadora de préstamos\n• Sistema de reservas online\n• Tours virtuales' :
+            formData.rubro === 'Retail' ?
+              '• Catálogo de productos con carrito de compras\n• Sistema de pagos online\n• Reviews y ratings\n• Programa de lealtad' :
+              '• Calculadoras financieras\n• Simuladores de crédito\n• Dashboard personalizado\n• Sistema de seguridad 2FA'}
 
 Una estructura web optimizada mejorará significativamente la experiencia del usuario y la conversión de visitantes en clientes potenciales.
 
@@ -947,8 +949,8 @@ Por favor, verifique la URL e intente nuevamente.`
   };
 
   const handleCaracteristicaChange = (id: string, valor: string) => {
-    setCaracteristicas(prev => 
-      prev.map(item => 
+    setCaracteristicas(prev =>
+      prev.map(item =>
         item.id === id ? { ...item, contenido: valor } : item
       )
     );
@@ -968,7 +970,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       // Preparar datos para el PDF
       const cotizacionData = {
@@ -987,6 +989,7 @@ Por favor, verifique la URL e intente nuevamente.`
         urlAnalisis: formData.urlAnalisis,
         detallePagina: formData.detallePagina,
         duracionProyecto: formData.duracionProyecto,
+        formaPago: formData.formaPago,
         crmSeleccionado: formData.crmSeleccionado,
         crmOtro: formData.crmOtro,
         caracteristicas: caracteristicas,
@@ -997,7 +1000,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
       // Generar PDF
       await PDFGeneratorService.generateCotizacionPDF(cotizacionData);
-      
+
       console.log('Datos del formulario:', cotizacionData);
       setSuccessMessage('¡Cotización PDF generada y descargada exitosamente!');
       setSuccess(true);
@@ -1014,42 +1017,39 @@ Por favor, verifique la URL e intente nuevamente.`
   const guardarCotizacion = async () => {
     try {
       const token = localStorage.getItem('token');
+
+      const nombreCotizacion = formData.nombreEmpresa
+        ? `Cotización - ${formData.nombreEmpresa}`
+        : 'Cotización sin nombre';
+
       const cotizacionData = {
-        fecha: formData.fecha,
-        nombreEmpresa: formData.nombreEmpresa,
-        nombreProyecto: formData.nombreProyecto,
-        nombreContacto: formData.nombreContacto,
-        correoContacto: formData.correoContacto,
-        rubro: formData.rubro,
-        servicio: formData.servicio,
-        tipo: formData.tipo,
-        promptsRequerimientos: formData.promptsRequerimientos,
-        requerimientosMejorados: formData.requerimientosMejorados,
-        servicioNecesidad: formData.servicioNecesidad,
-        descripcionProyecto: formData.descripcionProyecto,
-        urlAnalisis: formData.urlAnalisis,
-        detallePagina: formData.detallePagina,
-        duracionProyecto: formData.duracionProyecto,
-        crmSeleccionado: formData.crmSeleccionado,
-        crmOtro: formData.crmOtro,
-        caracteristicas,
-        itemsPropuesta,
-        serviciosAdicionales,
-        tiempoAnalizado: formData.tiempoAnalizado
+        nombre: nombreCotizacion,
+        data: {
+          ...formData,
+          caracteristicas: caracteristicas,
+          itemsPropuesta: itemsPropuesta,
+          serviciosAdicionales: serviciosAdicionales,
+          requerimientosMejorados: formData.requerimientosMejorados,
+          fechaCreacion: new Date().toISOString()
+        }
       };
 
-      await apiClient.post(API_ENDPOINTS.GUARDAR_COTIZACION, cotizacionData, {
+      const response = await apiClient.post(API_ENDPOINTS.GUARDAR_COTIZACION, cotizacionData, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      setGuardando(false);
-      setGuardadoExitoso(true);
-      setTimeout(() => setGuardadoExitoso(false), 3000);
+      if (response.status === 201) {
+        setGuardadoExitoso(true);
+        setTimeout(() => setGuardadoExitoso(false), 3000);
+      }
     } catch (error) {
       console.error('Error guardando cotización:', error);
       setError('Error al guardar la cotización');
+      setGuardando(false);
+    } finally {
       setGuardando(false);
     }
   };
@@ -1058,20 +1058,20 @@ Por favor, verifique la URL e intente nuevamente.`
 
   return (
     <Box sx={{ maxWidth: '1000px', mx: 'auto' }}>
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 4, 
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
           borderRadius: 2,
           background: 'white',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
         }}
       >
-        <Typography 
-          variant="h4" 
-          component="h1" 
-          sx={{ 
-            mb: 4, 
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{
+            mb: 4,
             color: '#333',
             fontWeight: 'bold',
             textAlign: 'center',
@@ -1082,26 +1082,26 @@ Por favor, verifique la URL e intente nuevamente.`
           Cotizador
         </Typography>
 
-        <Paper 
-          sx={{ 
-            p: 3, 
-            mb: 4, 
+        <Paper
+          sx={{
+            p: 3,
+            mb: 4,
             backgroundColor: '#f8f9fa',
             border: '1px solid #e9ecef',
             borderRadius: 2
           }}
         >
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              mb: 2, 
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
               color: '#495057',
               fontWeight: 'bold'
             }}
           >
             Datos de la empresa:
           </Typography>
-          
+
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ flex: '1 1 300px' }}>
               <Typography variant="body1" sx={{ mb: 1, color: '#6c757d' }}>
@@ -1322,79 +1322,78 @@ Por favor, verifique la URL e intente nuevamente.`
               }}
             />
 
-            {/* Textarea condicional para Básico */}
-            {formData.tipo === 'Básico' && (
-              <Box>
-                <TextField
-                  label="Prompts de requerimientos técnicos"
-                  variant="outlined"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={formData.promptsRequerimientos}
-                  onChange={handleChange('promptsRequerimientos')}
+            {/* Campo de prompts de requerimientos técnicos - siempre visible */}
+            <Box>
+              <TextField
+                label="Prompts de requerimientos técnicos"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                value={formData.promptsRequerimientos}
+                onChange={handleChange('promptsRequerimientos')}
+                placeholder="Ingrese los requerimientos técnicos del proyecto..."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
+                  },
+                }}
+              />
+              
+              <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                <Button
+                  onClick={mejorarRequerimientos}
+                  variant="contained"
+                  startIcon={<RobotIcon />}
+                  disabled={mejorandoRequerimientos}
                   sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&:hover fieldset': {
-                        borderColor: '#667eea',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
-                      },
+                    backgroundColor: '#667eea',
+                    '&:hover': {
+                      backgroundColor: '#5a6fd8',
+                    },
+                    '&:disabled': {
+                      backgroundColor: '#ccc',
                     },
                   }}
-                />
-                
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <Button
-                    onClick={mejorarRequerimientos}
-                    variant="contained"
-                    startIcon={<RobotIcon />}
-                    disabled={mejorandoRequerimientos}
-                    sx={{
-                      backgroundColor: '#667eea',
-                      '&:hover': {
-                        backgroundColor: '#5a6fd8',
-                      },
-                      '&:disabled': {
-                        backgroundColor: '#ccc',
-                      },
-                    }}
-                  >
-                    {mejorandoRequerimientos ? 'Mejorando...' : 'Mejorar con IA'}
-                  </Button>
-                </Box>
-
-                {/* Card con resultado mejorado */}
-                {formData.requerimientosMejorados && (
-                  <Card sx={{ mt: 3, backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
-                    <CardContent>
-                      <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
-                        Requerimientos Técnicos Mejorados:
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        multiline
-                        rows={4}
-                        value={formData.requerimientosMejorados}
-                        onChange={handleChange('requerimientosMejorados')}
-                        placeholder="Requerimientos técnicos mejorados..."
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
-                            '&:hover fieldset': {
-                              borderColor: '#667eea',
-                            },
-                            '&.Mui-focused fieldset': {
-                              borderColor: '#667eea',
-                            },
-                          },
-                        }}
-                      />
-                    </CardContent>
-                  </Card>
-                )}
+                >
+                  {mejorandoRequerimientos ? 'Mejorando...' : 'Mejorar con IA'}
+                </Button>
               </Box>
-            )}
+
+              {/* Card con resultado mejorado */}
+              {formData.requerimientosMejorados && (
+                <Card sx={{ mt: 3, backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                  <CardContent>
+                    <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
+                      Requerimientos Técnicos Mejorados:
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      value={formData.requerimientosMejorados}
+                      onChange={handleChange('requerimientosMejorados')}
+                      placeholder="Requerimientos técnicos mejorados..."
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          '&:hover fieldset': {
+                            borderColor: '#667eea',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </Box>
 
             {/* Texto fijo */}
             <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
@@ -1407,9 +1406,9 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* Sección de Características */}
             <Box>
-              <Typography 
-                variant="h5" 
-                sx={{ 
+              <Typography
+                variant="h5"
+                sx={{
                   color: '#333',
                   fontWeight: 'bold',
                   mb: 3,
@@ -1418,12 +1417,12 @@ Por favor, verifique la URL e intente nuevamente.`
                 PRINCIPALES CARACTERÍSTICAS A IMPLEMENTAR
               </Typography>
 
-              <DndContext 
+              <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
               >
-                <SortableContext 
+                <SortableContext
                   items={caracteristicas.map(c => c.id)}
                   strategy={verticalListSortingStrategy}
                 >
@@ -1464,7 +1463,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* Contenido fijo adicional */}
             <Divider sx={{ my: 3 }} />
-            
+
             {/* Proceso del Diseño */}
             <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2 }}>
               <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
@@ -1678,11 +1677,11 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* Nueva sección: Estructura propuesta del sitio web */}
             <Divider sx={{ my: 3 }} />
-            
+
             <Box>
-              <Typography 
-                variant="h5" 
-                sx={{ 
+              <Typography
+                variant="h5"
+                sx={{
                   color: '#333',
                   fontWeight: 'bold',
                   mb: 3,
@@ -1776,7 +1775,7 @@ Por favor, verifique la URL e intente nuevamente.`
                     Pruebas de integración con proveedor.
                   </Typography>
                 </Box>
-                
+
                 {/* Combo CRM */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <FormControl fullWidth>
@@ -1801,7 +1800,7 @@ Por favor, verifique la URL e intente nuevamente.`
                       ))}
                     </Select>
                   </FormControl>
-                  
+
                   {/* Input para "Otros" */}
                   {formData.crmSeleccionado === 'Otros' && (
                     <TextField
@@ -1829,11 +1828,11 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* NUEVA SECCIÓN: PROPUESTA ECONÓMICA */}
             <Divider sx={{ my: 3 }} />
-            
+
             <Box>
-              <Typography 
-                variant="h5" 
-                sx={{ 
+              <Typography
+                variant="h5"
+                sx={{
                   color: '#333',
                   fontWeight: 'bold',
                   mb: 3,
@@ -1849,7 +1848,7 @@ Por favor, verifique la URL e intente nuevamente.`
                     Diseño y desarrollo de página web Inmobiliaria
                   </Typography>
                 </Box>
-                
+
                 <TableContainer>
                   <Table>
                     <TableHead>
@@ -1945,7 +1944,7 @@ Por favor, verifique la URL e intente nuevamente.`
                     </TableBody>
                   </Table>
                 </TableContainer>
-                
+
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
                   <Button
                     startIcon={<AddIcon />}
@@ -1973,7 +1972,7 @@ Por favor, verifique la URL e intente nuevamente.`
                     Servicios adicionales
                   </Typography>
                 </Box>
-                
+
                 <TableContainer>
                   <Table>
                     <TableHead>
@@ -2052,7 +2051,7 @@ Por favor, verifique la URL e intente nuevamente.`
                     </TableBody>
                   </Table>
                 </TableContainer>
-                
+
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
                   <Button
                     startIcon={<AddIcon />}
@@ -2084,8 +2083,28 @@ Por favor, verifique la URL e intente nuevamente.`
                   <strong>Validez de la Cotización:</strong> 30 días.
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  <strong>Forma de pago:</strong> {formData.servicio === 'Mejora (solo mostrar el tipo básico)' ? '100% al aceptar la propuesta.' : '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.'}
+                  <strong>Forma de pago:</strong>
                 </Typography>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={2}
+                  value={formData.formaPago}
+                  onChange={handleChange('formaPago')}
+                  placeholder="Especifique la forma de pago..."
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      '&:hover fieldset': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#667eea',
+                      },
+                    },
+                  }}
+                />
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   <strong>Moneda:</strong> Dólares Americanos.
                 </Typography>
@@ -2140,19 +2159,19 @@ Por favor, verifique la URL e intente nuevamente.`
               <Typography variant="h6" sx={{ mb: 3, color: '#495057', fontWeight: 'bold' }}>
                 FIRMA:
               </Typography>
-              
+
               {/* Imagen de firma */}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
                 mb: 3,
                 p: 2,
                 border: '2px dashed #dee2e6',
                 borderRadius: 2,
                 backgroundColor: '#f8f9fa'
               }}>
-                <img 
-                  src="/images/firma.png" 
+                <img
+                  src="/images/firma.png"
                   alt="Firma"
                   style={{
                     width: '250px',
@@ -2189,7 +2208,7 @@ Por favor, verifique la URL e intente nuevamente.`
                   [Firma]
                 </Box>
               </Box>
-              
+
               <Typography variant="body1" sx={{ color: '#495057', fontWeight: 'bold', mb: 1 }}>
                 Juan Jesús Astete Meza
               </Typography>
@@ -2209,7 +2228,7 @@ Por favor, verifique la URL e intente nuevamente.`
                 ¡Cotización guardada exitosamente en la base de datos!
               </Alert>
             )}
-            
+
             <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
               <Button
                 variant="contained"
@@ -2232,7 +2251,7 @@ Por favor, verifique la URL e intente nuevamente.`
               >
                 {guardando ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
               </Button>
-              
+
               <Button
                 type="submit"
                 variant="contained"
