@@ -20,6 +20,7 @@ export interface CotizacionData {
   urlAnalisis: string;
   detallePagina: string;
   duracionProyecto: string;
+  formaPago: string;
   crmSeleccionado: string;
   crmOtro: string;
   caracteristicas: Array<{ id: string; contenido: string }>;
@@ -440,9 +441,7 @@ export class PDFGeneratorService {
     content.push(this.formatBoldBeforeColon('Validez de la Cotización: 30 días.'));
     
     // Forma de pago
-    const formaPago = data.servicio === 'Mejora (solo mostrar el tipo básico)' 
-      ? '100% al aceptar la propuesta.' 
-      : '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.';
+    const formaPago = data.formaPago || '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.';
     content.push(this.formatBoldBeforeColon(`Forma de pago: ${formaPago}`));
     
     // Moneda
