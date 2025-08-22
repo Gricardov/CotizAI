@@ -2361,7 +2361,7 @@ Por favor, verifique la URL e intente nuevamente.`
                   fontWeight: 'bold',
                 }}
               >
-                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Grabar y guardar'}
+                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
               </Button>
 
               <Button
