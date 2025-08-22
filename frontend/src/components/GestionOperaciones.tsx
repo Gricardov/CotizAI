@@ -180,10 +180,10 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
 
     try {
       await apiClient.delete(`${API_ENDPOINTS.OPERACIONES}/${id}`);
-      loadOperaciones();
-    } catch (error) {
-      console.error('Error deleting operacion:', error);
-      setError('Error al eliminar la operación');
+        loadOperaciones();
+      } catch (error) {
+        console.error('Error deleting operacion:', error);
+        setError('Error al eliminar la operación');
     }
   };
 

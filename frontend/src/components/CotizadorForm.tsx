@@ -567,6 +567,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
   const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [descripcionProyectoVisible, setDescripcionProyectoVisible] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -774,8 +775,15 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
           servicioNecesidad: generarTextoServicio(newFormData.rubro, newFormData.servicio)
         }));
 
-        // Generar descripción del proyecto automáticamente
+        // Generar descripción del proyecto automáticamente cuando se seleccionen rubro y servicio
         generarDescripcionProyecto(newFormData.rubro, newFormData.servicio);
+      } else {
+        // Si no están todos los campos, ocultar el textarea
+        setDescripcionProyectoVisible(false);
+        setFormData(prev => ({
+          ...prev,
+          descripcionProyecto: ''
+        }));
       }
     }
 
@@ -895,6 +903,9 @@ Por favor, verifique la URL e intente nuevamente.`
   };
 
   const generarDescripcionProyecto = async (rubro: string, servicio: string) => {
+    setGenerandoDescripcion(true);
+    setDescripcionProyectoVisible(false);
+    
     try {
       const response = await apiClient.post(API_ENDPOINTS.GENERAR_DESCRIPCION_PROYECTO, {
         rubro,
@@ -910,9 +921,23 @@ Por favor, verifique la URL e intente nuevamente.`
           ...prev,
           descripcionProyecto: response.data.descripcion
         }));
+      } else {
+        // Si no hay respuesta, limpiar el campo
+        setFormData(prev => ({
+          ...prev,
+          descripcionProyecto: ''
+        }));
       }
     } catch (error) {
       console.error('Error generando descripción del proyecto:', error);
+      // En caso de error, limpiar el campo
+      setFormData(prev => ({
+        ...prev,
+        descripcionProyecto: ''
+      }));
+    } finally {
+      setGenerandoDescripcion(false);
+      setDescripcionProyectoVisible(true);
     }
   };
 
@@ -1099,7 +1124,7 @@ Por favor, verifique la URL e intente nuevamente.`
               fontWeight: 'bold'
             }}
           >
-            Datos de la empresa:
+            Datos basicos del proyecto:
           </Typography>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
@@ -1301,31 +1326,102 @@ Por favor, verifique la URL e intente nuevamente.`
             </Box>
 
             {/* Descripción del proyecto */}
-            <TextField
-              label="Descripción del proyecto"
-              variant="outlined"
-              fullWidth
-              multiline
-              rows={4}
-              value={formData.descripcionProyecto}
-              onChange={handleChange('descripcionProyecto')}
-              placeholder="Descripción detallada del proyecto..."
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  '&:hover fieldset': {
-                    borderColor: '#667eea',
+            {descripcionProyectoVisible && (
+              <TextField
+                label="Descripción del proyecto"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                value={formData.descripcionProyecto}
+                onChange={handleChange('descripcionProyecto')}
+                placeholder="Descripción detallada del proyecto..."
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '&:hover fieldset': {
+                      borderColor: '#667eea',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#667eea',
+                    },
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#667eea',
+                }}
+              />
+            )}
+
+            {/* Animación de procesamiento para descripción del proyecto */}
+            {generandoDescripcion && (
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                p: 3,
+                border: '2px dashed #667eea',
+                borderRadius: 2,
+                backgroundColor: '#f8f9fa'
+              }}>
+                <Box sx={{
+                  position: 'relative',
+                  animation: 'bounce 2s infinite',
+                  '@keyframes bounce': {
+                    '0%, 20%, 53%, 80%, 100%': {
+                      transform: 'translate3d(0,0,0)',
+                    },
+                    '40%, 43%': {
+                      transform: 'translate3d(0, -15px, 0)',
+                    },
+                    '70%': {
+                      transform: 'translate3d(0, -7px, 0)',
+                    },
+                    '90%': {
+                      transform: 'translate3d(0, -3px, 0)',
+                    },
                   },
-                },
-              }}
-            />
+                }}>
+                  <RobotIcon sx={{
+                    fontSize: 50,
+                    color: '#667eea',
+                    filter: 'drop-shadow(0 4px 8px rgba(102, 126, 234, 0.3))',
+                  }} />
+                  <Box sx={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    animation: 'pulse 1.5s infinite',
+                    '@keyframes pulse': {
+                      '0%': {
+                        transform: 'scale(1)',
+                        opacity: 1,
+                      },
+                      '50%': {
+                        transform: 'scale(1.2)',
+                        opacity: 0.7,
+                      },
+                      '100%': {
+                        transform: 'scale(1)',
+                        opacity: 1,
+                      },
+                    },
+                  }}>
+                    <CircularProgress size={16} sx={{ color: '#764ba2' }} />
+                  </Box>
+                </Box>
+                <Typography variant="h6" sx={{ mt: 2, color: '#667eea', fontWeight: 'bold' }}>
+                  Generando descripción del proyecto...
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#6c757d', textAlign: 'center', mt: 1, maxWidth: 300 }}>
+                  🤖 Analizando requerimientos<br />
+                  ✨ Generando descripción personalizada<br />
+                  🎯 Adaptando al sector {formData.rubro}<br />
+                  💡 Optimizando para {formData.servicio}
+                </Typography>
+              </Box>
+            )}
 
             {/* Campo de prompts de requerimientos técnicos - siempre visible */}
             <Box>
               <TextField
-                label="Prompts de requerimientos técnicos"
+                label="Prompt de requerimientos técnicos"
                 variant="outlined"
                 fullWidth
                 multiline
@@ -1761,70 +1857,86 @@ Por favor, verifique la URL e intente nuevamente.`
                   },
                 }}
               />
-
-              {/* Campos fijos de integración con combobox CRM */}
-              <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2, mb: 3 }}>
-                <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
-                  INTEGRACIÓN:
-                </Typography>
-                <Box sx={{ color: '#6c757d', lineHeight: 1.8, mb: 3 }}>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Integración de leads e inventario de unidades por proyecto.
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1 }}>
-                    Pruebas de integración con proveedor.
-                  </Typography>
-                </Box>
-
-                {/* Combo CRM */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Integración: Mediante API a CRM</InputLabel>
-                    <Select
-                      value={formData.crmSeleccionado}
-                      label="Integración: Mediante API a CRM"
-                      onChange={handleChange('crmSeleccionado')}
-                      sx={{
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#667eea',
-                        },
-                      }}
-                    >
-                      {opcionesCRM.map((crm) => (
-                        <MenuItem key={crm} value={crm}>
-                          {crm}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  {/* Input para "Otros" */}
-                  {formData.crmSeleccionado === 'Otros' && (
-                    <TextField
-                      label="Especificar CRM"
-                      variant="outlined"
-                      fullWidth
-                      value={formData.crmOtro}
-                      onChange={handleChange('crmOtro')}
-                      placeholder="Ingrese el nombre del CRM..."
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          '&:hover fieldset': {
-                            borderColor: '#667eea',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#667eea',
-                          },
-                        },
-                      }}
-                    />
-                  )}
-                </Box>
-              </Paper>
             </Box>
+
+            {/* Nueva sección: Agregar otros servicios */}
+            <Divider sx={{ my: 3 }} />
+
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  color: '#333',
+                  fontWeight: 'bold',
+                  mb: 3,
+                }}
+              >
+                Agregar otros servicios
+              </Typography>
+            </Box>
+
+            {/* Campos fijos de integración con combobox CRM */}
+            <Paper sx={{ p: 3, backgroundColor: '#f8f9fa', borderRadius: 2, mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, color: '#495057', fontWeight: 'bold' }}>
+                INTEGRACIÓN:
+              </Typography>
+              <Box sx={{ color: '#6c757d', lineHeight: 1.8, mb: 3 }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Integración de leads e inventario de unidades por proyecto.
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  Pruebas de integración con proveedor.
+                </Typography>
+              </Box>
+
+              {/* Combo CRM */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Integración: Mediante API a CRM</InputLabel>
+                  <Select
+                    value={formData.crmSeleccionado}
+                    label="Integración: Mediante API a CRM"
+                    onChange={handleChange('crmSeleccionado')}
+                    sx={{
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#667eea',
+                      },
+                    }}
+                  >
+                    {opcionesCRM.map((crm) => (
+                      <MenuItem key={crm} value={crm}>
+                        {crm}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Input para "Otros" */}
+                {formData.crmSeleccionado === 'Otros' && (
+                  <TextField
+                    label="Especificar CRM"
+                    variant="outlined"
+                    fullWidth
+                    value={formData.crmOtro}
+                    onChange={handleChange('crmOtro')}
+                    placeholder="Ingrese el nombre del CRM..."
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        '&:hover fieldset': {
+                          borderColor: '#667eea',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#667eea',
+                        },
+                      },
+                    }}
+                  />
+                )}
+              </Box>
+            </Paper>
 
             {/* NUEVA SECCIÓN: PROPUESTA ECONÓMICA */}
             <Divider sx={{ my: 3 }} />
@@ -2249,7 +2361,7 @@ Por favor, verifique la URL e intente nuevamente.`
                   fontWeight: 'bold',
                 }}
               >
-                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
+                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Grabar y guardar'}
               </Button>
 
               <Button
@@ -2270,7 +2382,7 @@ Por favor, verifique la URL e intente nuevamente.`
                   fontWeight: 'bold',
                 }}
               >
-                Generar Cotización PDF
+                Imprimir cotización en PDF
               </Button>
             </Box>
           </Box>
