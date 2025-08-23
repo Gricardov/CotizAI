@@ -28,11 +28,13 @@ import {
   Person as PersonIcon,
   Assignment as AssignmentIcon,
   FilterList as FilterIcon,
+  FileDownload as FileDownloadIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 import API_ENDPOINTS from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 import apiClient from '../config/axios';
+import * as XLSX from 'xlsx';
 
 interface Operacion {
   id: number;
@@ -187,6 +189,59 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
     }
   };
 
+  const exportarAExcel = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(API_ENDPOINTS.EXPORTAR_OPERACIONES);
+      
+      if (response.data.success) {
+        // Crear el workbook y worksheet
+        const workbook = XLSX.utils.book_new();
+        
+        // Preparar los datos para Excel
+        const datosExcel = [
+          ['Fecha', 'Área'], // Headers
+          ...response.data.data.map((item: any) => [item.fecha, item.area])
+        ];
+
+        // Crear el worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(datosExcel);
+
+        // Ajustar el ancho de las columnas
+        worksheet['!cols'] = [
+          { width: 15 }, // Fecha
+          { width: 20 }  // Área
+        ];
+
+        // Agregar el worksheet al workbook
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Operaciones');
+
+        // Generar el archivo Excel
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        
+        // Descargar el archivo
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `operaciones_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        // Mostrar mensaje de éxito
+        setError('');
+        alert(`✅ Se exportaron ${response.data.totalRegistros} operaciones exitosamente`);
+      }
+    } catch (error) {
+      console.error('Error exportando operaciones:', error);
+      setError('Error al exportar las operaciones');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLoadCotizacion = (operacion: Operacion) => {
     if (operacion.data && onLoadCotizacion) {
       onLoadCotizacion(operacion.data);
@@ -224,10 +279,31 @@ export const GestionOperaciones: React.FC<GestionOperacionesProps> = ({ onLoadCo
   return (
     <Box sx={{ maxWidth: '1400px', mx: 'auto' }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
           <Typography variant="h4" component="h1" sx={{ color: '#333', fontWeight: 'bold' }}>
             Gestión de Operaciones
           </Typography>
+          {canEdit && (
+            <Button
+              variant="contained"
+              startIcon={<FileDownloadIcon />}
+              onClick={exportarAExcel}
+              disabled={loading}
+              sx={{
+                background: 'linear-gradient(135deg, #217346 0%, #1e6b3d 100%)',
+                boxShadow: '0 2px 8px rgba(33, 115, 70, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1e6b3d 0%, #185a33 100%)',
+                  boxShadow: '0 4px 12px rgba(33, 115, 70, 0.4)',
+                },
+                '&:disabled': {
+                  background: '#ccc',
+                },
+              }}
+            >
+              Exportar a Excel
+            </Button>
+          )}
         </Box>
 
         {error && (

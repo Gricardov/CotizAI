@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException, Put, Delete, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException, Put, Delete, Query, InternalServerErrorException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from '../services/user.service';
@@ -220,6 +220,34 @@ export class AuthController {
       throw new UnauthorizedException('Acceso denegado');
     }
     return await this.operacionService.deleteOperacion(data.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('exportar-operaciones-excel')
+  async exportarOperacionesExcel(@Request() req: any) {
+    console.log('exportarOperacionesExcel');
+    if (req.user.rol !== 'admin') {
+      throw new UnauthorizedException('Acceso denegado');
+    }
+    
+    try {
+      const operaciones = await this.operacionService.getAllOperaciones();
+      
+      // Formatear datos para Excel (solo fecha y área)
+      const datosExcel = operaciones.map(operacion => ({
+        fecha: new Date(operacion.fecha).toLocaleDateString('es-ES'),
+        area: operacion.area
+      }));
+
+      return {
+        success: true,
+        data: datosExcel,
+        totalRegistros: datosExcel.length
+      };
+    } catch (error) {
+      console.error('Error exportando operaciones:', error);
+      throw new InternalServerErrorException('Error al exportar operaciones');
+    }
   }
 
   private crearDescripcionProyecto(rubro: string, servicio: string): string {

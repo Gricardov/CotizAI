@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   // Operaciones endpoints
   OPERACIONES: `${API_BASE_URL}/auth/operaciones`,
   AREAS: `${API_BASE_URL}/auth/areas`,
+  EXPORTAR_OPERACIONES: `${API_BASE_URL}/auth/exportar-operaciones-excel`,
   GUARDAR_COTIZACION: `${API_BASE_URL}/auth/guardar-cotizacion`,
   
   // AI endpoints

@@ -515,49 +515,110 @@ interface CotizadorFormProps {
 }
 
 export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, onCotizacionLoaded }) => {
-  const [formData, setFormData] = useState({
-    fecha: new Date().toISOString().split('T')[0],
-    nombreEmpresa: '',
-    nombreProyecto: '',
-    nombreContacto: '',
-    correoContacto: '',
-    rubro: '',
-    servicio: '',
-    tipo: '',
-    promptsRequerimientos: '',
-    requerimientosMejorados: '',
-    servicioNecesidad: '',
-    descripcionProyecto: '',
-    urlAnalisis: '',
-    detallePagina: '',
-    duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
-    formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
-    crmSeleccionado: '',
-    crmOtro: '',
-    tiempoAnalizado: ''
-  });
+  // Función para cargar datos iniciales desde localStorage
+  const cargarDatosIniciales = () => {
+    try {
+      const datosGuardados = localStorage.getItem('cotizacionLocal');
+      if (datosGuardados) {
+        const datos = JSON.parse(datosGuardados);
+        return {
+          formData: datos.formData || {
+            fecha: new Date().toISOString().split('T')[0],
+            nombreEmpresa: '',
+            nombreProyecto: '',
+            nombreContacto: '',
+            correoContacto: '',
+            rubro: '',
+            servicio: '',
+            tipo: '',
+            promptsRequerimientos: '',
+            requerimientosMejorados: '',
+            servicioNecesidad: '',
+            descripcionProyecto: '',
+            urlAnalisis: '',
+            detallePagina: '',
+            duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
+            formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
+            crmSeleccionado: '',
+            crmOtro: '',
+            tiempoAnalizado: ''
+          },
+          caracteristicas: datos.caracteristicas || [
+            { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
+            { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
+            { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
+            { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
+            { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
+            { id: '6', contenido: 'Funcionalidades Avanzadas' },
+            { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
+          ],
+          itemsPropuesta: datos.itemsPropuesta || [
+            { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+            { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
+          ],
+          serviciosAdicionales: datos.serviciosAdicionales || []
+        };
+      }
+    } catch (error) {
+      console.error('Error al cargar datos iniciales:', error);
+    }
+    
+    // Valores por defecto si no hay datos guardados
+    return {
+      formData: {
+        fecha: new Date().toISOString().split('T')[0],
+        nombreEmpresa: '',
+        nombreProyecto: '',
+        nombreContacto: '',
+        correoContacto: '',
+        rubro: '',
+        servicio: '',
+        tipo: '',
+        promptsRequerimientos: '',
+        requerimientosMejorados: '',
+        servicioNecesidad: '',
+        descripcionProyecto: '',
+        urlAnalisis: '',
+        detallePagina: '',
+        duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
+        formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
+        crmSeleccionado: '',
+        crmOtro: '',
+        tiempoAnalizado: ''
+      },
+      caracteristicas: [
+        { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
+        { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
+        { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
+        { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
+        { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
+        { id: '6', contenido: 'Funcionalidades Avanzadas' },
+        { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
+      ],
+      itemsPropuesta: [
+        { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+        { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
+      ],
+      serviciosAdicionales: []
+    };
+  };
 
-  const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>([
-    { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
-    { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
-    { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
-    { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
-    { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
-    { id: '6', contenido: 'Funcionalidades Avanzadas' },
-    { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
-  ]);
-
-  const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>([
-    { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-    { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
-  ]);
-
-  const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>([]);
+  const datosIniciales = cargarDatosIniciales();
+  
+  const [formData, setFormData] = useState(datosIniciales.formData);
+  const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>(datosIniciales.caracteristicas);
+  const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>(datosIniciales.itemsPropuesta);
+  const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>(datosIniciales.serviciosAdicionales);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -568,6 +629,9 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [descripcionProyectoVisible, setDescripcionProyectoVisible] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [guardandoLocal, setGuardandoLocal] = useState(false);
+  const [guardadoLocalExitoso, setGuardadoLocalExitoso] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -575,6 +639,170 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  // Función para validar el formulario
+  const validarFormulario = () => {
+    const nuevosErrores: {[key: string]: string} = {};
+
+    // Validar campos requeridos
+    if (!formData.fecha.trim()) {
+      nuevosErrores.fecha = 'La fecha es requerida';
+    }
+    if (!formData.nombreEmpresa.trim()) {
+      nuevosErrores.nombreEmpresa = 'El nombre de la empresa es requerido';
+    }
+    if (!formData.nombreProyecto.trim()) {
+      nuevosErrores.nombreProyecto = 'El nombre del proyecto es requerido';
+    }
+    if (!formData.nombreContacto.trim()) {
+      nuevosErrores.nombreContacto = 'El nombre del contacto es requerido';
+    }
+    if (!formData.correoContacto.trim()) {
+      nuevosErrores.correoContacto = 'El correo de contacto es requerido';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correoContacto)) {
+      nuevosErrores.correoContacto = 'El correo debe tener un formato válido';
+    }
+    if (!formData.rubro.trim()) {
+      nuevosErrores.rubro = 'El rubro es requerido';
+    }
+    if (!formData.servicio.trim()) {
+      nuevosErrores.servicio = 'El servicio es requerido';
+    }
+    if (!formData.tipo.trim()) {
+      nuevosErrores.tipo = 'El tipo es requerido';
+    }
+    if (!formData.promptsRequerimientos.trim()) {
+      nuevosErrores.promptsRequerimientos = 'Los requerimientos técnicos son requeridos';
+    }
+    if (!formData.formaPago.trim()) {
+      nuevosErrores.formaPago = 'La forma de pago es requerida';
+    }
+    if (!formData.duracionProyecto.trim()) {
+      nuevosErrores.duracionProyecto = 'La duración del proyecto es requerida';
+    }
+
+    // Validar que al menos un item de propuesta tenga monto
+    const tieneMonto = itemsPropuesta.some(item => 
+      (typeof item.monto === 'string' ? item.monto !== '' : item.monto > 0)
+    );
+    if (!tieneMonto) {
+      nuevosErrores.itemsPropuesta = 'Al menos un item de propuesta debe tener un monto';
+    }
+
+    // Validar que las características no estén vacías
+    const caracteristicasVacias = caracteristicas.some(car => !car.contenido.trim());
+    if (caracteristicasVacias) {
+      nuevosErrores.caracteristicas = 'Todas las características deben tener contenido';
+    }
+
+    setErrors(nuevosErrores);
+    return Object.keys(nuevosErrores).length === 0;
+  };
+
+  // Cargar datos de cotización cuando se reciben las props (sobrescribe localStorage)
+  useEffect(() => {
+    if (cotizacionToLoad) {
+      try {
+        // Cargar datos del formulario
+        setFormData(prev => ({
+          ...prev,
+          fecha: cotizacionToLoad.fecha || '',
+          nombreEmpresa: cotizacionToLoad.nombreEmpresa || '',
+          nombreProyecto: cotizacionToLoad.nombreProyecto || '',
+          nombreContacto: cotizacionToLoad.nombreContacto || '',
+          correoContacto: cotizacionToLoad.correoContacto || '',
+          rubro: cotizacionToLoad.rubro || '',
+          servicio: cotizacionToLoad.servicio || '',
+          tipo: cotizacionToLoad.tipo || '',
+          promptsRequerimientos: cotizacionToLoad.promptsRequerimientos || '',
+          requerimientosMejorados: cotizacionToLoad.requerimientosMejorados || '',
+          servicioNecesidad: cotizacionToLoad.servicioNecesidad || '',
+          descripcionProyecto: cotizacionToLoad.descripcionProyecto || '',
+          urlAnalisis: cotizacionToLoad.urlAnalisis || '',
+          detallePagina: cotizacionToLoad.detallePagina || '',
+          duracionProyecto: cotizacionToLoad.duracionProyecto || '',
+          formaPago: cotizacionToLoad.formaPago || '',
+          crmSeleccionado: cotizacionToLoad.crmSeleccionado || '',
+          crmOtro: cotizacionToLoad.crmOtro || '',
+          tiempoAnalizado: cotizacionToLoad.tiempoAnalizado || ''
+        }));
+
+        // Cargar características
+        if (cotizacionToLoad.caracteristicas && Array.isArray(cotizacionToLoad.caracteristicas)) {
+          setCaracteristicas(cotizacionToLoad.caracteristicas);
+        }
+
+        // Cargar items de propuesta
+        if (cotizacionToLoad.itemsPropuesta && Array.isArray(cotizacionToLoad.itemsPropuesta)) {
+          setItemsPropuesta(cotizacionToLoad.itemsPropuesta);
+        }
+
+        // Cargar servicios adicionales
+        if (cotizacionToLoad.serviciosAdicionales && Array.isArray(cotizacionToLoad.serviciosAdicionales)) {
+          setServiciosAdicionales(cotizacionToLoad.serviciosAdicionales);
+        }
+
+        // Mostrar mensaje de éxito
+        setSuccessMessage('¡Cotización cargada exitosamente desde la base de datos!');
+        setSuccess(true);
+        setTimeout(() => {
+          setSuccess(false);
+          setSuccessMessage('');
+        }, 3000);
+
+        // Notificar que se han cargado los datos
+        if (onCotizacionLoaded) {
+          onCotizacionLoaded();
+        }
+      } catch (error) {
+        console.error('Error al cargar cotización:', error);
+      }
+    }
+  }, [cotizacionToLoad, onCotizacionLoaded]);
+
+  // Guardar en localStorage cuando cambien los datos (guardado automático)
+  useEffect(() => {
+    // Solo guardar si no estamos cargando datos desde cotizacionToLoad
+    if (!cotizacionToLoad) {
+      const datosParaGuardar = {
+        formData,
+        caracteristicas,
+        itemsPropuesta,
+        serviciosAdicionales,
+        fechaGuardado: new Date().toISOString()
+      };
+      localStorage.setItem('cotizacionLocal', JSON.stringify(datosParaGuardar));
+    }
+  }, [formData, caracteristicas, itemsPropuesta, serviciosAdicionales, cotizacionToLoad]);
+
+  // Función para guardar en localStorage
+  const guardarEnLocalStorage = () => {
+    // Validar formulario antes de guardar
+    if (!validarFormulario()) {
+      setError('Por favor, complete todos los campos requeridos correctamente antes de guardar.');
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
+
+    setGuardandoLocal(true);
+    try {
+      const datosParaGuardar = {
+        formData,
+        caracteristicas,
+        itemsPropuesta,
+        serviciosAdicionales,
+        fechaGuardado: new Date().toISOString()
+      };
+      localStorage.setItem('cotizacionLocal', JSON.stringify(datosParaGuardar));
+      setGuardadoLocalExitoso(true);
+      setTimeout(() => setGuardadoLocalExitoso(false), 3000);
+    } catch (error) {
+      console.error('Error al guardar en localStorage:', error);
+      setError('Error al guardar localmente');
+    } finally {
+      setGuardandoLocal(false);
+    }
+  };
 
   // Cargar datos de cotización cuando se reciben las props
   useEffect(() => {
@@ -996,6 +1224,13 @@ Por favor, verifique la URL e intente nuevamente.`
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validar formulario antes de proceder
+    if (!validarFormulario()) {
+      setError('Por favor, complete todos los campos requeridos correctamente.');
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
+
     try {
       // Preparar datos para el PDF
       const cotizacionData = {
@@ -1039,7 +1274,15 @@ Por favor, verifique la URL e intente nuevamente.`
     }
   };
 
-  const guardarCotizacion = async () => {
+  const enviarCotizacion = async () => {
+    // Validar formulario antes de proceder
+    if (!validarFormulario()) {
+      setError('Por favor, complete todos los campos requeridos correctamente.');
+      setTimeout(() => setError(''), 5000);
+      return;
+    }
+
+    setGuardando(true);
     try {
       const token = localStorage.getItem('token');
 
@@ -1071,9 +1314,8 @@ Por favor, verifique la URL e intente nuevamente.`
         setTimeout(() => setGuardadoExitoso(false), 3000);
       }
     } catch (error) {
-      console.error('Error guardando cotización:', error);
-      setError('Error al guardar la cotización');
-      setGuardando(false);
+      console.error('Error enviando cotización:', error);
+      setError('Error al enviar la cotización');
     } finally {
       setGuardando(false);
     }
@@ -1161,6 +1403,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 variant="outlined"
                 value={formData.fecha}
                 onChange={handleChange('fecha')}
+                error={!!errors.fecha}
+                helperText={errors.fecha}
+                required
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -1182,6 +1427,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 variant="outlined"
                 value={formData.nombreEmpresa}
                 onChange={handleChange('nombreEmpresa')}
+                error={!!errors.nombreEmpresa}
+                helperText={errors.nombreEmpresa}
+                required
                 sx={{
                   flex: '1 1 200px',
                   '& .MuiOutlinedInput-root': {
@@ -1200,6 +1448,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 variant="outlined"
                 value={formData.nombreProyecto}
                 onChange={handleChange('nombreProyecto')}
+                error={!!errors.nombreProyecto}
+                helperText={errors.nombreProyecto}
+                required
                 sx={{
                   flex: '1 1 200px',
                   '& .MuiOutlinedInput-root': {
@@ -1220,6 +1471,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 variant="outlined"
                 value={formData.nombreContacto}
                 onChange={handleChange('nombreContacto')}
+                error={!!errors.nombreContacto}
+                helperText={errors.nombreContacto}
+                required
                 sx={{
                   flex: '1 1 250px',
                   '& .MuiOutlinedInput-root': {
@@ -1239,6 +1493,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 type="email"
                 value={formData.correoContacto}
                 onChange={handleChange('correoContacto')}
+                error={!!errors.correoContacto}
+                helperText={errors.correoContacto}
+                required
                 sx={{
                   flex: '1 1 250px',
                   '& .MuiOutlinedInput-root': {
@@ -1255,7 +1512,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* Combos reorganizados */}
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl sx={{ flex: '1 1 200px' }}>
+              <FormControl sx={{ flex: '1 1 200px' }} error={!!errors.rubro} required>
                 <InputLabel>Rubro</InputLabel>
                 <Select
                   value={formData.rubro}
@@ -1276,9 +1533,14 @@ Por favor, verifique la URL e intente nuevamente.`
                     </MenuItem>
                   ))}
                 </Select>
+                {errors.rubro && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                    {errors.rubro}
+                  </Typography>
+                )}
               </FormControl>
 
-              <FormControl sx={{ flex: '1 1 200px' }}>
+              <FormControl sx={{ flex: '1 1 200px' }} error={!!errors.servicio} required>
                 <InputLabel>Servicio</InputLabel>
                 <Select
                   value={formData.servicio}
@@ -1299,9 +1561,14 @@ Por favor, verifique la URL e intente nuevamente.`
                     </MenuItem>
                   ))}
                 </Select>
+                {errors.servicio && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                    {errors.servicio}
+                  </Typography>
+                )}
               </FormControl>
 
-              <FormControl sx={{ flex: '1 1 200px' }}>
+              <FormControl sx={{ flex: '1 1 200px' }} error={!!errors.tipo} required>
                 <InputLabel>Tipo</InputLabel>
                 <Select
                   value={formData.tipo}
@@ -1322,6 +1589,11 @@ Por favor, verifique la URL e intente nuevamente.`
                     </MenuItem>
                   ))}
                 </Select>
+                {errors.tipo && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                    {errors.tipo}
+                  </Typography>
+                )}
               </FormControl>
             </Box>
 
@@ -1428,6 +1700,9 @@ Por favor, verifique la URL e intente nuevamente.`
                 rows={4}
                 value={formData.promptsRequerimientos}
                 onChange={handleChange('promptsRequerimientos')}
+                error={!!errors.promptsRequerimientos}
+                helperText={errors.promptsRequerimientos}
+                required
                 placeholder="Ingrese los requerimientos técnicos del proyecto..."
                 sx={{
                   '& .MuiOutlinedInput-root': {
@@ -1512,6 +1787,12 @@ Por favor, verifique la URL e intente nuevamente.`
               >
                 PRINCIPALES CARACTERÍSTICAS A IMPLEMENTAR
               </Typography>
+              
+              {errors.caracteristicas && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {errors.caracteristicas}
+                </Alert>
+              )}
 
               <DndContext
                 sensors={sensors}
@@ -1952,6 +2233,12 @@ Por favor, verifique la URL e intente nuevamente.`
               >
                 Propuesta Económica
               </Typography>
+              
+              {errors.itemsPropuesta && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {errors.itemsPropuesta}
+                </Alert>
+              )}
 
               {/* Tabla principal: Diseño y desarrollo de página web */}
               <Paper sx={{ mb: 3 }}>
@@ -2204,6 +2491,9 @@ Por favor, verifique la URL e intente nuevamente.`
                   rows={2}
                   value={formData.formaPago}
                   onChange={handleChange('formaPago')}
+                  error={!!errors.formaPago}
+                  helperText={errors.formaPago}
+                  required
                   placeholder="Especifique la forma de pago..."
                   sx={{
                     mb: 2,
@@ -2230,6 +2520,9 @@ Por favor, verifique la URL e intente nuevamente.`
                   rows={3}
                   value={formData.duracionProyecto}
                   onChange={handleChange('duracionProyecto')}
+                  error={!!errors.duracionProyecto}
+                  helperText={errors.duracionProyecto}
+                  required
                   sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {
@@ -2329,6 +2622,12 @@ Por favor, verifique la URL e intente nuevamente.`
               </Typography>
             </Box>
 
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
             {success && (
               <Alert severity="success" sx={{ mb: 2 }}>
                 {successMessage}
@@ -2337,16 +2636,48 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {guardadoExitoso && (
               <Alert severity="success" sx={{ mb: 2 }}>
-                ¡Cotización guardada exitosamente en la base de datos!
+                ¡Cotización enviada exitosamente a la base de datos!
               </Alert>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
+            {guardadoLocalExitoso && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                ¡Cotización guardada exitosamente en el navegador!
+              </Alert>
+            )}
+
+            <Alert severity="info" sx={{ mb: 2 }}>
+              💾 Los datos se guardan automáticamente mientras editas. Al recargar la página se restaurarán automáticamente.
+            </Alert>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2, flexWrap: 'wrap' }}>
               <Button
                 variant="contained"
                 size="large"
                 startIcon={<SaveIcon />}
-                onClick={guardarCotizacion}
+                onClick={guardarEnLocalStorage}
+                disabled={guardandoLocal}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #17a2b8 0%, #138496 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #138496 0%, #117a8b 100%)',
+                  },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                }}
+              >
+                {guardandoLocal ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
+              </Button>
+
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<SaveIcon />}
+                onClick={enviarCotizacion}
                 disabled={guardando}
                 sx={{
                   px: 4,
@@ -2361,7 +2692,7 @@ Por favor, verifique la URL e intente nuevamente.`
                   fontWeight: 'bold',
                 }}
               >
-                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Guardar'}
+                {guardando ? <CircularProgress size={20} color="inherit" /> : 'Enviar'}
               </Button>
 
               <Button
