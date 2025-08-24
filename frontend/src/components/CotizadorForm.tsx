@@ -614,17 +614,16 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
   };
 
   const datosIniciales = cargarDatosIniciales();
-  
+
   const [formData, setFormData] = useState(datosIniciales.formData);
   const [caracteristicas, setCaracteristicas] = useState<Caracteristica[]>(datosIniciales.caracteristicas);
   const [itemsPropuesta, setItemsPropuesta] = useState<ItemPropuesta[]>(datosIniciales.itemsPropuesta);
   const [serviciosAdicionales, setServiciosAdicionales] = useState<ServicioAdicional[]>(datosIniciales.serviciosAdicionales);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [analizandoWeb, setAnalizandoWeb] = useState(false);
-  const [generandoDescripcion, setGenerandoDescripcion] = useState(false);
+  const [generandoDescripcion, setGeqnerandoDescripcion] = useState(false);
   const [mejorandoRequerimientos, setMejorandoRequerimientos] = useState(false);
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
