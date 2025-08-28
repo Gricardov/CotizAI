@@ -106,71 +106,48 @@ const caracteristicasDefault = [
   "Imagen Profesional y Credibilidad: Una página web renovada refleja una imagen profesional y confiable de la empresa. Con un diseño pulido y contenido de calidad, la página web inspira confianza en los visitantes y les da la seguridad de estar tratando con una empresa seria y competente."
 ];
 
-const itemsPropuestaDefault: ItemPropuesta[] = [
-  {
-    id: 'item-1',
-    descripcion: 'Diseño UX/UI completo',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
+const defaultFormData = {
+  formData: {
+    fecha: new Date().toISOString().split('T')[0],
+    nombreEmpresa: '',
+    nombreProyecto: '',
+    nombreContacto: '',
+    correoContacto: '',
+    rubro: '',
+    servicio: '',
+    tipo: '',
+    promptsRequerimientos: '',
+    requerimientosMejorados: '',
+    servicioNecesidad: '',
+    descripcionProyecto: '',
+    urlAnalisis: '',
+    detallePagina: '',
+    duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
+    formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
+    crmSeleccionado: '',
+    crmOtro: '',
+    tiempoAnalizado: ''
   },
-  {
-    id: 'item-2',
-    descripcion: 'Desarrollo Frontend Responsive',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  },
-  {
-    id: 'item-3',
-    descripcion: 'Desarrollo Backend y API',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  },
-  {
-    id: 'item-4',
-    descripcion: 'Integración CRM',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  },
-  {
-    id: 'item-5',
-    descripcion: 'Optimización SEO',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  },
-  {
-    id: 'item-6',
-    descripcion: 'Testing y QA',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  },
-  {
-    id: 'item-7',
-    descripcion: 'Despliegue en Producción',
-    monto: '',
-    descuento: '',
-    subtotal: 0,
-    igv: 0,
-    total: 0
-  }
-];
+  caracteristicas: [
+    { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
+    { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
+    { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
+    { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
+    { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
+    { id: '6', contenido: 'Funcionalidades Avanzadas' },
+    { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
+  ],
+  itemsPropuesta: [
+    { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
+    { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
+  ],
+  serviciosAdicionales: []
+};
 
 // Componente para tarjeta sorteable
 interface SortableCardProps {
@@ -569,48 +546,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
     }
     
     // Valores por defecto si no hay datos guardados
-    return {
-      formData: {
-        fecha: new Date().toISOString().split('T')[0],
-        nombreEmpresa: '',
-        nombreProyecto: '',
-        nombreContacto: '',
-        correoContacto: '',
-        rubro: '',
-        servicio: '',
-        tipo: '',
-        promptsRequerimientos: '',
-        requerimientosMejorados: '',
-        servicioNecesidad: '',
-        descripcionProyecto: '',
-        urlAnalisis: '',
-        detallePagina: '',
-        duracionProyecto: 'El proyecto tiene una duración estimada de 3 meses (90 días calendario), divididos en sprints de 2 semanas cada uno. Se entregarán avances cada 15 días con revisiones y ajustes según el feedback del cliente.',
-        formaPago: '50% al aceptar la propuesta y 50% al recibir el acta de conformidad del servicio y su posterior publicación en producción.',
-        crmSeleccionado: '',
-        crmOtro: '',
-        tiempoAnalizado: ''
-      },
-      caracteristicas: [
-        { id: '1', contenido: 'Diseño responsivo y moderno que se adapte a todos los dispositivos' },
-        { id: '2', contenido: 'Optimización SEO para mejorar la visibilidad en motores de búsqueda' },
-        { id: '3', contenido: 'Integración con redes sociales y herramientas de marketing digital' },
-        { id: '4', contenido: 'Panel de administración intuitivo para gestionar contenido' },
-        { id: '5', contenido: 'Sistema de formularios de contacto y captura de leads' },
-        { id: '6', contenido: 'Funcionalidades Avanzadas' },
-        { id: '7', contenido: 'Imagen Profesional y Credibilidad' }
-      ],
-      itemsPropuesta: [
-        { id: '1', descripcion: 'Diseño UX/UI', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '2', descripcion: 'Desarrollo Frontend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '3', descripcion: 'Desarrollo Backend', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '4', descripcion: 'Integración con CRM', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '5', descripcion: 'Optimización SEO', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '6', descripcion: 'Testing y QA', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 },
-        { id: '7', descripcion: 'Despliegue y Configuración', monto: '', descuento: '', subtotal: 0, igv: 0, total: 0 }
-      ],
-      serviciosAdicionales: []
-    };
+    return defaultFormData;
   };
 
   const datosIniciales = cargarDatosIniciales();
@@ -1309,6 +1245,8 @@ Por favor, verifique la URL e intente nuevamente.`
       });
 
       if (response.status === 201) {
+        localStorage.clear();
+        setFormData(defaultFormData);
         setGuardadoExitoso(true);
         setTimeout(() => setGuardadoExitoso(false), 3000);
       }
