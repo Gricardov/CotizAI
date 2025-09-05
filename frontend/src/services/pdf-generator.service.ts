@@ -41,6 +41,15 @@ export interface CotizacionData {
     total: number;
   }>;
   tiempoAnalizado: string;
+  procesosVisibles?: {
+    procesoUX: boolean;
+    procesoUI: boolean;
+    procesoSEO: boolean;
+    entregables: boolean;
+    maquetacion: boolean;
+    consideraciones: boolean;
+    noIncluye: boolean;
+  };
 }
 
 // Contenido fijo extraído directamente del formulario web
@@ -304,53 +313,67 @@ export class PDFGeneratorService {
     }
 
     // Proceso del Diseño UX
-    content.push({ 
-      text: 'Proceso del Diseño UX:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.procesoUX));
+    if (data.procesosVisibles?.procesoUX !== false) {
+      content.push({ 
+        text: 'Proceso del Diseño UX:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.procesoUX));
+    }
 
     // Proceso del Diseño UI
-    content.push({ 
-      text: 'Proceso del Diseño UI:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.procesoUI));
+    if (data.procesosVisibles?.procesoUI !== false) {
+      content.push({ 
+        text: 'Proceso del Diseño UI:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.procesoUI));
+    }
 
     // Proceso de Análisis SEO
-    content.push({ 
-      text: 'Proceso de Análisis SEO:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.procesoSEO));
+    if (data.procesosVisibles?.procesoSEO !== false) {
+      content.push({ 
+        text: 'Proceso de Análisis SEO:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.procesoSEO));
+    }
 
     // Entregables
-    content.push({ 
-      text: 'Entregables:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.entregables));
+    if (data.procesosVisibles?.entregables !== false) {
+      content.push({ 
+        text: 'Entregables:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.entregables));
+    }
 
     // Maquetación web y mobile
-    content.push({ 
-      text: 'Maquetación web y mobile:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.maquetacion));
+    if (data.procesosVisibles?.maquetacion !== false) {
+      content.push({ 
+        text: 'Maquetación web y mobile:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.maquetacion));
+    }
 
     // Consideraciones
-    content.push({ 
-      text: 'Consideraciones:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.consideraciones));
+    if (data.procesosVisibles?.consideraciones !== false) {
+      content.push({ 
+        text: 'Consideraciones:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.consideraciones));
+    }
 
     // No incluye
-    content.push({ 
-      text: 'No incluye:', 
-      style: 'listSubtitle'
-    });
-    content.push(...createBulletList(SECCIONES_FIJAS.noIncluye));
+    if (data.procesosVisibles?.noIncluye !== false) {
+      content.push({ 
+        text: 'No incluye:', 
+        style: 'listSubtitle'
+      });
+      content.push(...createBulletList(SECCIONES_FIJAS.noIncluye));
+    }
 
     // Decoración visual entre secciones
     content.push({
