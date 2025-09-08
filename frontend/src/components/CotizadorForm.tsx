@@ -587,6 +587,7 @@ export const CotizadorForm: React.FC<CotizadorFormProps> = ({ cotizacionToLoad, 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [guardandoLocal, setGuardandoLocal] = useState(false);
   const [guardadoLocalExitoso, setGuardadoLocalExitoso] = useState(false);
+  const [restauracionExitosa, setRestauracionExitosa] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -1195,6 +1196,30 @@ Por favor, verifique la URL e intente nuevamente.`
     setProcesosVisibles(defaultFormData.procesosVisibles);
   };
 
+  // Función para restaurar completamente el formulario
+  const restaurarFormularioCompleto = () => {
+    // Limpiar localStorage
+    localStorage.removeItem('cotizacionLocal');
+    localStorage.removeItem('procesosVisibles');
+    
+    // Restaurar todos los estados a sus valores por defecto
+    setFormData(defaultFormData);
+    setCaracteristicas(defaultFormData.caracteristicas);
+    setItemsPropuesta(defaultFormData.itemsPropuesta);
+    setServiciosAdicionales(defaultFormData.serviciosAdicionales);
+    setProcesosVisibles(defaultFormData.procesosVisibles);
+    
+    // Limpiar estados de UI
+    setError('');
+    setErrors({});
+    setDescripcionProyectoVisible(false);
+    setGenerandoDescripcion(false);
+    
+    // Mostrar mensaje de confirmación
+    setRestauracionExitosa(true);
+    setTimeout(() => setRestauracionExitosa(false), 3000);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -1273,7 +1298,7 @@ Por favor, verifique la URL e intente nuevamente.`
           itemsPropuesta: itemsPropuesta,
           serviciosAdicionales: serviciosAdicionales,
           procesosVisibles: procesosVisibles,
-          requerimientosMejorados: formData.requerimientosMejorados,
+        requerimientosMejorados: formData.requerimientosMejorados,
           fechaCreacion: new Date().toISOString()
         }
       };
@@ -1818,7 +1843,7 @@ Por favor, verifique la URL e intente nuevamente.`
 
             {/* Contenido fijo adicional */}
             <Divider sx={{ my: 3 }} />
-
+            
             {/* Botón para restaurar tarjetas eliminables */}
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 2, mb: 3 }}>
               <Button
@@ -1882,32 +1907,32 @@ Por favor, verifique la URL e intente nuevamente.`
                 title="Proceso del Diseño UI:"
                 onDelete={() => toggleProcesoVisibilidad('procesoUI')}
               >
-                <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño de interacción.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Guías de interacción.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño de elementos: botones, documentos, etc.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño visual: iconos, imágenes, ilustraciones.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Guías de estilo: paletas de colores, tipografías.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño de cada una de las páginas: Prototipo navegable web y móvil.</span>
-                  </Typography>
-                </Box>
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de interacción.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guías de interacción.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de elementos: botones, documentos, etc.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño visual: iconos, imágenes, ilustraciones.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guías de estilo: paletas de colores, tipografías.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de cada una de las páginas: Prototipo navegable web y móvil.</span>
+                </Typography>
+              </Box>
               </ProcessCard>
             )}
 
@@ -1917,28 +1942,28 @@ Por favor, verifique la URL e intente nuevamente.`
                 title="Proceso de Análisis SEO:"
                 onDelete={() => toggleProcesoVisibilidad('procesoSEO')}
               >
-                <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Análisis, búsqueda y creación de Keywords para posicionamiento web.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Correcto nombramiento de archivos.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Nomenclatura de páginas internas y proyectos.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Detalle de Metatags.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Listado de Inlinks y outlinks.</span>
-                  </Typography>
-                </Box>
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Análisis, búsqueda y creación de Keywords para posicionamiento web.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Correcto nombramiento de archivos.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Nomenclatura de páginas internas y proyectos.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Detalle de Metatags.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Listado de Inlinks y outlinks.</span>
+                </Typography>
+              </Box>
               </ProcessCard>
             )}
 
@@ -1948,24 +1973,24 @@ Por favor, verifique la URL e intente nuevamente.`
                 title="Entregables:"
                 onDelete={() => toggleProcesoVisibilidad('entregables')}
               >
-                <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño navegable en Figma.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Guía de estilos.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Exportación de elementos visuales en .svg .webp .png .jpg</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Informe SEO con listado de palabras, tags, keywords por proyecto.</span>
-                  </Typography>
-                </Box>
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño navegable en Figma.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Guía de estilos.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Exportación de elementos visuales en .svg .webp .png .jpg</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Informe SEO con listado de palabras, tags, keywords por proyecto.</span>
+                </Typography>
+              </Box>
               </ProcessCard>
             )}
 
@@ -1975,40 +2000,40 @@ Por favor, verifique la URL e intente nuevamente.`
                 title="Maquetación web y mobile:"
                 onDelete={() => toggleProcesoVisibilidad('maquetacion')}
               >
-                <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Implementación del diseño web y mobile en ambiente de desarrollo.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Integración de leads desde todos los formularios a CRM</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Implementación y optimización SEO básica para mejorar la visibilidad del sitio web en los motores de búsqueda.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Integración de Google Analytics para el seguimiento y análisis del tráfico web.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Implementación de mapa de calor con Clarity.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>QA, pruebas unitarias y performance.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Pase a producción.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Implementación de un sistema de gestión de contenido (CMS) para facilitar la administración y actualización del sitio web.</span>
-                  </Typography>
-                </Box>
+              <Box sx={{ color: '#6c757d', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación del diseño web y mobile en ambiente de desarrollo.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Integración de leads desde todos los formularios a CRM</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación y optimización SEO básica para mejorar la visibilidad del sitio web en los motores de búsqueda.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Integración de Google Analytics para el seguimiento y análisis del tráfico web.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación de mapa de calor con Clarity.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>QA, pruebas unitarias y performance.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Pase a producción.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Implementación de un sistema de gestión de contenido (CMS) para facilitar la administración y actualización del sitio web.</span>
+                </Typography>
+              </Box>
               </ProcessCard>
             )}
 
@@ -2017,8 +2042,8 @@ Por favor, verifique la URL e intente nuevamente.`
               <Paper sx={{ p: 3, backgroundColor: '#fff3cd', borderRadius: 2, border: '1px solid #ffeaa7', position: 'relative' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ color: '#856404', fontWeight: 'bold' }}>
-                    Consideraciones:
-                  </Typography>
+                Consideraciones:
+              </Typography>
                   <IconButton
                     size="small"
                     color="error"
@@ -2032,33 +2057,33 @@ Por favor, verifique la URL e intente nuevamente.`
                     <DeleteIcon />
                   </IconButton>
                 </Box>
-                <Box sx={{ color: '#856404', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Deberá proveer la redacción del contenido de la página web.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Deberá proveer un banco de fotos, vídeos e imágenes en alta calidad o en formatos de edición.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Deberá proveer las ilustraciones de personajes, mascotas u otros que se desee incluir en el diseño.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>El diseño y desarrollo solo considera el idioma español.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Soporte técnico y mantenimiento básico durante un período inicial de 12 meses después del lanzamiento del sitio web.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>El costo final y el tiempo de entrega están sujetos a cambios según los requisitos adicionales del cliente y los ajustes solicitados durante el proceso de desarrollo.</span>
-                  </Typography>
-                </Box>
-              </Paper>
+              <Box sx={{ color: '#856404', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer la redacción del contenido de la página web.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer un banco de fotos, vídeos e imágenes en alta calidad o en formatos de edición.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Deberá proveer las ilustraciones de personajes, mascotas u otros que se desee incluir en el diseño.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>El diseño y desarrollo solo considera el idioma español.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Soporte técnico y mantenimiento básico durante un período inicial de 12 meses después del lanzamiento del sitio web.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>El costo final y el tiempo de entrega están sujetos a cambios según los requisitos adicionales del cliente y los ajustes solicitados durante el proceso de desarrollo.</span>
+                </Typography>
+              </Box>
+            </Paper>
             )}
 
             {/* No incluye */}
@@ -2066,8 +2091,8 @@ Por favor, verifique la URL e intente nuevamente.`
               <Paper sx={{ p: 3, backgroundColor: '#f8d7da', borderRadius: 2, border: '1px solid #f5c6cb', position: 'relative' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6" sx={{ color: '#721c24', fontWeight: 'bold' }}>
-                    No incluye:
-                  </Typography>
+                No incluye:
+              </Typography>
                   <IconButton
                     size="small"
                     color="error"
@@ -2081,21 +2106,21 @@ Por favor, verifique la URL e intente nuevamente.`
                     <DeleteIcon />
                   </IconButton>
                 </Box>
-                <Box sx={{ color: '#721c24', lineHeight: 1.6 }}>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Toma de Fotografía, creación o edición de videos.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Redacción de contenido.</span>
-                  </Typography>
-                  <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
-                    <span>Diseño de Ilustraciones e imágenes.</span>
-                  </Typography>
-                </Box>
-              </Paper>
+              <Box sx={{ color: '#721c24', lineHeight: 1.6 }}>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Toma de Fotografía, creación o edición de videos.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1.5, display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Redacción de contenido.</span>
+                </Typography>
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <span style={{ marginRight: '8px', marginTop: '2px' }}>•</span>
+                  <span>Diseño de Ilustraciones e imágenes.</span>
+                </Typography>
+              </Box>
+            </Paper>
             )}
 
             {/* Nueva sección: Estructura propuesta del sitio web */}
@@ -2691,6 +2716,12 @@ Por favor, verifique la URL e intente nuevamente.`
                 ¡Cotización guardada exitosamente en el navegador!
               </Alert>
             )}
+            
+            {restauracionExitosa && (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                ¡Formulario restaurado exitosamente!
+              </Alert>
+            )}
 
             <Alert severity="info" sx={{ mb: 2 }}>
               💾 Los datos se guardan automáticamente mientras editas. El botón "Guardar" hace una copia de seguridad manual. Al recargar la página se restaurarán automáticamente.
@@ -2760,6 +2791,28 @@ Por favor, verifique la URL e intente nuevamente.`
                 }}
               >
                 Imprimir cotización en PDF
+              </Button>
+              
+              <Button
+                type="button"
+                variant="contained"
+                size="large"
+                onClick={restaurarFormularioCompleto}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+                  color: 'white',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #e55a2b 0%, #e0841a 100%)',
+                  },
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                }}
+              >
+                🔄 Restaurar
               </Button>
             </Box>
           </Box>
