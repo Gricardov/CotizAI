@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException, Put, Delete, Query, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, UnauthorizedException, Put, Delete, Query, InternalServerErrorException, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { UserService } from '../services/user.service';
@@ -215,11 +215,11 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('operaciones/:id')
-  async deleteOperacion(@Request() req: any, @Body() data: { id: number }) {
+  async deleteOperacion(@Request() req: any, @Param('id') id: number) {
     if (req.user.rol !== 'admin') {
       throw new UnauthorizedException('Acceso denegado');
     }
-    return await this.operacionService.deleteOperacion(data.id);
+    return await this.operacionService.deleteOperacion(id);
   }
 
   @UseGuards(JwtAuthGuard)
